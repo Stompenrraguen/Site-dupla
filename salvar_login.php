@@ -7,8 +7,8 @@ if (!isset($_POST["b1"]) || empty($_SESSION["cpf_cadastro"])) {
 }
 
 $cpf   = $_SESSION["cpf_cadastro"];
-$login = preg_replace("/[^a-zA-Z0-9_]/", "", trim($_POST["login"] ?? ""));
-$senha = trim($_POST["senha"] ?? "");
+$login = preg_replace("/[^a-zA-Z0-9_]/", "", trim($login);
+$senha = trim($senha) ?? "");
 
 if (empty($login) || empty($senha)) {
     header("Location: cadastro2.php");
