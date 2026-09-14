@@ -1,41 +1,43 @@
-<?php
-if (!isset($_SESSION)) session_start();
+<?php 
+if (!isset($_SESSION)) session_start(); 
 
-if (!isset($_POST["b1"]) || empty($_SESSION["cpf_cadastro"])) {
-    header("Location: cadastro1.php");
-    exit;
-}
+include "app/cons.php";
+require_once "app/DLL.php";
+ 
+if (!isset($_POST["b1"]) || empty($_SESSION["cpf_cadastro"])) { 
+    header("Location: cadastro1.php"); 
+    exit; 
+} 
+ 
+$cpf = $_SESSION["cpf_cadastro"]; 
 
-$cpf   = $_SESSION["cpf_cadastro"];
-$login = preg_replace("/[^a-zA-Z0-9_]/", "", trim($login);
-$senha = trim($senha) ?? "");
+$login = preg_replace("/[^a-zA-Z0-9_]/", "", trim($_POST["login"] ?? ""));
+$senha = trim($_POST["senha"] ?? "");
 
-if (empty($login) || empty($senha)) {
-    header("Location: cadastro2.php");
-    exit;
-}
+if (empty($login) || empty($senha)) { 
+    header("Location: cadastro2.php"); 
+    exit; 
+} 
 
-if (!is_dir("login")) {
-    mkdir("login", 0777, true);
-}
+$consulta = "SELECT * FROM login WHERE login = '$login'";
+$resultado = banco($server, $user, $password, $db, $consulta);
 
-$arquivoLogin = "login/".$login.".DAT";
-
-if (file_exists($arquivoLogin)) {
+if ($resultado->fetch_assoc()) {
     $_SESSION["erro_cadastro2"] = "login_existe";
     header("Location: cadastro2.php");
     exit;
 }
 
-$f = fopen($arquivoLogin, "w");
-fwrite($f, $login."\n");
-fwrite($f, md5($senha)."\n");
-fwrite($f, $cpf."\n");
-fclose($f);
+$senhaHash = password_hash($senha, PASSWORD_DEFAULT);
 
-unset($_SESSION["cpf_cadastro"]); // Remove o CPF temporário usado durante o cadastro.
-$_SESSION["cadastro_ok"] = "ok";
+$consulta = "INSERT INTO login (login, senha, cpf)
+             VALUES ('$login', '$senhaHash', '$cpf')";
 
-header("Location: login.php");
-exit;
+banco($server, $user, $password, $db, $consulta);
+
+unset($_SESSION["cpf_cadastro"]);
+$_SESSION["cadastro_ok"] = "ok"; 
+ 
+header("Location: login.php"); 
+exit; 
 ?>
