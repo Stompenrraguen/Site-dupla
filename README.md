@@ -1,0 +1,1 @@
+Site feito usando php e css e html, linkado a um banco de dados MySql, o site possui uma biblioteca que não exige login para ser usada, com uma aba de carrinho e login para realizar compras, site ficticio feito apenas para aprendizado
