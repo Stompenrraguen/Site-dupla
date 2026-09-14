@@ -1,6 +1,9 @@
 <?php
 if (!isset($_SESSION)) session_start();
 
+include "app/cons.php";
+require_once "app/DLL.php";
+
 if (!isset($_POST["b1"])) {
     header("Location: cadastro1.php");
     exit;
@@ -14,19 +17,18 @@ if (empty($nome) || empty($cpf)) {
     exit;
 }
 
-if (!is_dir("usuarios")) {
-    mkdir("usuarios", 0777, true);
-}
+$endereco = trim($_POST["endereco"] ?? "");
+$bairro = trim($_POST["bairro"] ?? "");
+$cidade = trim($_POST["cidade"] ?? "");
+$estado = trim($_POST["estado"] ?? "");
+$cep = trim($_POST["cep"] ?? "");
 
-$arquivo = fopen("usuarios/".$cpf.".DAT", "w");
-fwrite($arquivo, $nome."\n");
-fwrite($arquivo, $cpf."\n");
-fwrite($arquivo, trim($_POST["endereco"] ?? "")."\n");
-fwrite($arquivo, trim($_POST["bairro"] ?? "")."\n");
-fwrite($arquivo, trim($_POST["cidade"] ?? "")."\n");
-fwrite($arquivo, trim($_POST["estado"] ?? "")."\n");
-fwrite($arquivo, trim($_POST["cep"] ?? "")."\n");
-fclose($arquivo);
+$consulta = "INSERT INTO usuarios 
+(nome, cpf, endereco, bairro, cidade, estado, cep)
+VALUES 
+('$nome', '$cpf', '$endereco', '$bairro', '$cidade', '$estado', '$cep')";
+
+banco($server, $user, $password, $db, $consulta);
 
 $_SESSION["cpf_cadastro"] = $cpf;
 
