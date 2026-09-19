@@ -28,8 +28,8 @@ if (!isset($_SESSION)) session_start();
         <p>Nosso objetivo é aproximar jogadores de novos jogos por meio de ofertas selecionadas, navegação simples e uma experiência de compra direta, segura e profissional.</p>
 
         <h2>Criadores e Atendimento</h2>
-        <p><strong>Criadores:</strong> Kaio Carvalho, Enzo Daniel e equipe.</p>
-        <p><strong>Contato:</strong> atendimento@poubresteam.com</p>
+        <p><strong>Criadores:</strong> Enzo Daniel, Kaio Silva e equipe.</p>
+        <p><strong>Contatos:</strong> 202413600057@ifba.edu.br Para Atendimento </p>
     </section>
 </main>
 
