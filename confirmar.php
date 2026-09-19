@@ -27,7 +27,7 @@ if (empty($itensCompra)) {
     exit;
 }
 
-$usuario = $_SESSION["usuario"]; 
+$usuario = $_SESSION["usuario"];
 $total = 0;
 ?>
 <!DOCTYPE html>
@@ -44,12 +44,14 @@ $total = 0;
         <img src="img/steam-logo.png" alt="Logo" class="logo-site">
         <div><h1>PoubreSteam</h1><p>Confirmação de compra</p></div>
     </div>
+
     <nav class="menu-principal">
         <a href="index.php">Loja</a>
         <a href="carrinho.php">Carrinho</a>
         <a href="biblioteca.php">Biblioteca</a>
         <a href="sobre.php">Sobre</a>
     </nav>
+
     <div class="area-login">
         <p class="texto-usuario"><?= htmlspecialchars($_SESSION["nome"]) ?></p>
         <a href="logout.php" class="botao-secundario">Sair</a>
@@ -59,24 +61,45 @@ $total = 0;
 <main class="conteudo-principal confirmar-layout">
     <section class="cartao-confirmacao">
         <h2>Produto escolhido</h2>
+
         <?php foreach ($itensCompra as $id): ?>
             <?php if (isset($produtos[$id])): ?>
                 <?php $total = $total + $produtos[$id]["preco"]; ?>
+
                 <div class="produto-confirmar">
                     <img src="<?= $produtos[$id]["imagem"] ?>" alt="<?= htmlspecialchars($produtos[$id]["nome"]) ?>">
+
                     <div>
                         <h3><?= htmlspecialchars($produtos[$id]["nome"]) ?></h3>
                         <p><?= htmlspecialchars($produtos[$id]["descricao"]) ?></p>
+
+                        <div class="informacoes-compra">
+                            <p><strong>Desenvolvedora:</strong> <?= htmlspecialchars($produtos[$id]["desenvolvedora"]) ?></p>
+                            <p><strong>Publicadora:</strong> <?= htmlspecialchars($produtos[$id]["publicadora"]) ?></p>
+                            <p><strong>Gênero:</strong> <?= htmlspecialchars($produtos[$id]["genero"]) ?></p>
+                            <p><strong>Plataforma:</strong> <?= htmlspecialchars($produtos[$id]["plataformas"]) ?></p>
+                            <p><strong>Tamanho:</strong> <?= htmlspecialchars($produtos[$id]["tamanho"]) ?></p>
+                            <p><strong>Versão:</strong> <?= htmlspecialchars($produtos[$id]["versao"]) ?></p>
+                            <p><strong>Classificação:</strong> <?= htmlspecialchars($produtos[$id]["classificacao"]) ?></p>
+                            <p><strong>Idiomas:</strong> <?= htmlspecialchars($produtos[$id]["idiomas"]) ?></p>
+                            <p><strong>Modo de jogo:</strong> <?= htmlspecialchars($produtos[$id]["modo"]) ?></p>
+                            <p><strong>Data de lançamento:</strong> <?= htmlspecialchars($produtos[$id]["data_lancamento"]) ?></p>
+                            <p><strong>Licença:</strong> <?= htmlspecialchars($produtos[$id]["licenca"]) ?></p>
+                        </div>
+
                         <strong>R$ <?= number_format($produtos[$id]["preco"], 2, ",", ".") ?></strong>
                     </div>
                 </div>
+
             <?php endif; ?>
         <?php endforeach; ?>
+
         <strong class="preco-grande">Total: R$ <?= number_format($total, 2, ",", ".") ?></strong>
     </section>
 
     <section class="cartao-confirmacao">
         <h2>Dados do comprador</h2>
+
         <p><strong>Nome:</strong> <?= htmlspecialchars($usuario["nome"]) ?></p>
         <p><strong>CPF:</strong> <?= htmlspecialchars($usuario["cpf"]) ?></p>
         <p><strong>Endereço:</strong> <?= htmlspecialchars($usuario["endereco"]) ?></p>
@@ -87,6 +110,7 @@ $total = 0;
 
         <form action="salvar_venda.php" method="POST">
             <label>Forma de pagamento</label>
+
             <select name="pagamento" required>
                 <option value="">Selecione</option>
                 <option value="Pix">Pix</option>
@@ -94,6 +118,7 @@ $total = 0;
                 <option value="Boleto">Boleto</option>
                 <option value="Saldo PoubreSteam">Saldo PoubreSteam</option>
             </select>
+
             <button type="submit" name="b1" class="botao-principal">Confirmar compra</button>
         </form>
     </section>
@@ -102,5 +127,6 @@ $total = 0;
 <footer>
     <p>PoubreSteam &copy; 2026 - Todos os direitos reservados.</p>
 </footer>
+
 </body>
 </html>
