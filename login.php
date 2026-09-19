@@ -16,6 +16,7 @@ if (!empty($_SESSION["erro_login"])) {
 if (!empty($_SESSION["cadastro_ok"])) {
     $cadastro = $_SESSION["cadastro_ok"];
     unset($_SESSION["cadastro_ok"]); 
+}
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
