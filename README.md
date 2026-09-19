@@ -82,4 +82,11 @@ CREATE TABLE vendas (
         REFERENCES usuarios(cpf)
 );
 ```
+**Modelo Lógico:**
+
 <img width="1281" height="822" alt="Captura de tela 2026-09-18 233941" src="https://github.com/user-attachments/assets/5d43101c-2b14-455a-bf2e-875d232f51f7" />
+
+**Modelo Conceitual:**
+
+<img width="1162" height="677" alt="Captura de tela 2026-09-19 003838" src="https://github.com/user-attachments/assets/5a3c96b1-54dc-4dc0-9137-8ed68e1171de" />
+
