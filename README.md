@@ -1,90 +1,132 @@
 
-Site feito usando php e css e html, linkado a um banco de dados MySql, o site possui uma biblioteca que não exige login para ser usada, com uma aba de carrinho e login para realizar compras, site ficticio feito apenas para aprendizado
+Site feito usando php, css e html, linkado a um banco de dados MySql, o site possui uma biblioteca que não exige login para ser usada, com uma aba de carrinho e login para realizar compras, site ficticio feito apenas para aprendizado.
+Projeto Escolar ofertado pelos Professores de Programação Web e BD (Banco de Dados).
 
 MODELO FÍSICO DO BANCO DE DADOS:
 ```
 CREATE DATABASE IF NOT EXISTS poubresteam;
+
 USE poubresteam;
 
-//TABELA: USUARIOS         
+CREATE TABLE usuario (
+    id_usuario INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(150) NOT NULL,
+    cpf CHAR(11) NOT NULL UNIQUE
+);
 
-CREATE TABLE usuarios (
-    id INT NOT NULL AUTO_INCREMENT,
-    nome VARCHAR(100) NOT NULL,
-    cpf VARCHAR(11) NOT NULL,
+
+CREATE TABLE endereco (
+    id_endereco INT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario INT NOT NULL,
     endereco VARCHAR(200) NOT NULL,
     bairro VARCHAR(100) NOT NULL,
     cidade VARCHAR(100) NOT NULL,
-    estado VARCHAR(2) NOT NULL,
-    cep VARCHAR(8) NOT NULL,
-    
-    PRIMARY KEY (id),
-    UNIQUE KEY cpf (cpf)
+    estado CHAR(2) NOT NULL,
+    cep CHAR(8) NOT NULL,
+
+    CONSTRAINT fk_endereco_usuario
+        FOREIGN KEY (id_usuario)
+        REFERENCES usuario(id_usuario)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+
+    CONSTRAINT uq_endereco_usuario
+        UNIQUE (id_usuario)
 );
-
-
-
-//TABELA: LOGIN
-
 
 CREATE TABLE login (
-    id INT NOT NULL AUTO_INCREMENT,
-    login VARCHAR(50) NOT NULL,
+    id_login INT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario INT NOT NULL,
+    login VARCHAR(50) NOT NULL UNIQUE,
     senha VARCHAR(255) NOT NULL,
-    cpf VARCHAR(11) NOT NULL,
-
-    PRIMARY KEY (id),
-    UNIQUE KEY login (login),
-    UNIQUE KEY cpf (cpf),
 
     CONSTRAINT fk_login_usuario
-        FOREIGN KEY (cpf)
-        REFERENCES usuarios(cpf)
+        FOREIGN KEY (id_usuario)
+        REFERENCES usuario(id_usuario)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+
+    CONSTRAINT uq_login_usuario
+        UNIQUE (id_usuario)
 );
 
 
+CREATE TABLE produto (
+    id_produto INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(150) NOT NULL,
+    descricao TEXT,
+    preco DECIMAL(10,2) NOT NULL,
+    imagem VARCHAR(255),
+    desenvolvedora VARCHAR(100),
+    publicadora VARCHAR(100),
+    genero VARCHAR(100),
+    plataformas VARCHAR(100),
+    tamanho VARCHAR(30),
+    versao VARCHAR(20),
+    classificacao VARCHAR(30),
+    idiomas VARCHAR(100),
+    modo VARCHAR(100),
+    data_lancamento YEAR,
+    licenca VARCHAR(150)
+);
 
-//TABELA: CARRINHO
 
 
 CREATE TABLE carrinho (
-    id INT NOT NULL AUTO_INCREMENT,
-    cpf_usuario VARCHAR(11) NOT NULL,
-    produto_id INT NOT NULL,
+    id_carrinho INT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario INT NOT NULL,
+    id_produto INT NOT NULL,
     quantidade INT NOT NULL DEFAULT 1,
 
-    PRIMARY KEY (id),
-
-    UNIQUE KEY usuario_produto (cpf_usuario, produto_id),
-
     CONSTRAINT fk_carrinho_usuario
-        FOREIGN KEY (cpf_usuario)
-        REFERENCES usuarios(cpf)
+        FOREIGN KEY (id_usuario)
+        REFERENCES usuario(id_usuario)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+
+    CONSTRAINT fk_carrinho_produto
+        FOREIGN KEY (id_produto)
+        REFERENCES produto(id_produto)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+
+    CONSTRAINT uq_carrinho_produto
+        UNIQUE (id_usuario, id_produto)
 );
 
-//TABELA: VENDAS
+
+
 CREATE TABLE vendas (
-    id INT NOT NULL AUTO_INCREMENT,
+    id_venda INT AUTO_INCREMENT PRIMARY KEY,
     numero_venda VARCHAR(30) NOT NULL,
-    nome_usuario VARCHAR(100) NOT NULL,
-    cpf_usuario VARCHAR(11) NOT NULL,
-    produto VARCHAR(200) NOT NULL,
-    valor DECIMAL(10,2) NOT NULL,
+    id_usuario INT NOT NULL,
+    id_produto INT NOT NULL,
+    quantidade INT NOT NULL DEFAULT 1,
+    valor_unitario DECIMAL(10,2) NOT NULL,
+    valor_total DECIMAL(10,2) NOT NULL,
     forma_pagamento VARCHAR(50) NOT NULL,
-    data_hora DATETIME NOT NULL,
-
-    PRIMARY KEY (id),
-
-    UNIQUE KEY numero_venda (numero_venda),
+    data_hora DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT fk_vendas_usuario
-        FOREIGN KEY (cpf_usuario)
-        REFERENCES usuarios(cpf)
+        FOREIGN KEY (id_usuario)
+        REFERENCES usuario(id_usuario)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+
+    CONSTRAINT fk_vendas_produto
+        FOREIGN KEY (id_produto)
+        REFERENCES produto(id_produto)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
 );
+
+
+
 ```
 **Modelo Lógico:**
 
-<img width="1281" height="822" alt="Captura de tela 2026-09-18 233941" src="https://github.com/user-attachments/assets/5d43101c-2b14-455a-bf2e-875d232f51f7" />
+<img width="1092" height="832" alt="Captura de tela 2026-09-20 190013" src="https://github.com/user-attachments/assets/87961295-4c8b-490a-95d4-5215d5f31036" />
+
 
 **Modelo Conceitual:**
 
