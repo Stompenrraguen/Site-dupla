@@ -130,5 +130,6 @@ CREATE TABLE vendas (
 
 **Modelo Conceitual:**
 
-<img width="1162" height="677" alt="Captura de tela 2026-09-19 003838" src="https://github.com/user-attachments/assets/5a3c96b1-54dc-4dc0-9137-8ed68e1171de" />
+<img width="890" height="692" alt="Captura de tela 2026-09-20 192016" src="https://github.com/user-attachments/assets/f2759928-6e1b-435f-bea0-6cc931d1ae7f" />
+
 
