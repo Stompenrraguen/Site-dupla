@@ -1,4 +1,4 @@
-```php
+
 <?php
 $produtos = array(
     1 => array(
@@ -343,4 +343,4 @@ $produtos = array(
     )
 );
 ?>
-```
+
