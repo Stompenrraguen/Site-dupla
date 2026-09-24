@@ -632,14 +632,3 @@ ORDER BY id_produto;
 
 
 
-```
-**Modelo Lógico:**
-
-<img width="1182" height="777" alt="Captura de tela 2026-09-21 114728" src="https://github.com/user-attachments/assets/39dcde09-1a51-440c-bc44-133a82dd151c" />
-
-
-**Modelo Conceitual:**
-
-<img width="890" height="692" alt="Captura de tela 2026-09-20 192016" src="https://github.com/user-attachments/assets/f2759928-6e1b-435f-bea0-6cc931d1ae7f" />
-
-
