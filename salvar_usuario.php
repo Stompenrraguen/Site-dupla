@@ -1,55 +1,69 @@
 <?php
-
 if (!isset($_SESSION)) session_start();
 
 include "app/cons.php";
 require_once "app/DLL.php";
 
-if (!isset($_POST["b1"])) {
+if ($_SERVER["REQUEST_METHOD"] != "POST") {
     header("Location: cadastro1.php");
     exit;
 }
 
-$cpf = preg_replace("/[^0-9]/", "", $_POST["cpf"] ?? "");
-$nome = trim($_POST["nome"] ?? "");
+extract($_POST);
 
-$endereco = trim($_POST["endereco"] ?? "");
-$bairro = trim($_POST["bairro"] ?? "");
-$cidade = trim($_POST["cidade"] ?? "");
-$estado = trim($_POST["estado"] ?? "");
-$cep = trim($_POST["cep"] ?? "");
+$cpf = preg_replace("/[^0-9]/", "", $cpf);
+$cep = preg_replace("/[^0-9]/", "", $cep);
+$estado = strtoupper(trim($estado));
 
-if (empty($nome) || empty($cpf)) {
-    header("Location: cadastro1.php");
+if (strlen($cpf) != 11 || strlen($cep) != 8 || strlen($estado) != 2) {
+    echo "Dados inválidos. Verifique CPF, CEP e Estado.";
     exit;
 }
 
+$nome = addslashes(trim($nome));
+$cpf = addslashes($cpf);
+$endereco = addslashes(trim($endereco));
+$bairro = addslashes(trim($bairro));
+$cidade = addslashes(trim($cidade));
+$estado = addslashes($estado);
+$cep = addslashes($cep);
+$login = addslashes(trim($login));
+$senha = addslashes($senha);
 
-$consulta_usuario = "INSERT INTO usuario
-(nome, cpf)
-VALUES
-('$nome', '$cpf')";
+$consulta = "INSERT INTO usuario (nome, cpf)
+             VALUES ('$nome', '$cpf')";
 
-banco($server, $user, $password, $db, $consulta_usuario);
+banco($server, $user, $password, $db, $consulta);
 
-$consulta_id = "SELECT id_usuario FROM usuario WHERE cpf = '$cpf'";
+$consulta = "SELECT id_usuario
+             FROM usuario
+             WHERE cpf = '$cpf'";
 
-$resultado = banco($server, $user, $password, $db, $consulta_id);
+$resultado = banco($server, $user, $password, $db, $consulta);
 
-$usuario = $resultado->fetch_assoc();
+if (!$resultado || $resultado->num_rows == 0) {
+    echo "Não foi possível localizar o usuário cadastrado.";
+    exit;
+}
 
-$id_usuario = $usuario["id_usuario"];
+$dados = $resultado->fetch_assoc();
 
-$consulta_endereco = "INSERT INTO endereco
-(id_usuario, endereco, bairro, cidade, estado, cep)
-VALUES
-('$id_usuario', '$endereco', '$bairro', '$cidade', '$estado', '$cep')";
+extract($dados);
 
-banco($server, $user, $password, $db, $consulta_endereco);
+$consulta = "INSERT INTO endereco
+             (id_usuario, endereco, bairro, cidade, estado, cep)
+             VALUES
+             ('$id_usuario', '$endereco', '$bairro', '$cidade', '$estado', '$cep')";
 
-$_SESSION["cpf_cadastro"] = $cpf;
+banco($server, $user, $password, $db, $consulta);
 
-header("Location: cadastro2.php");
+$consulta = "INSERT INTO login
+             (id_usuario, login, senha)
+             VALUES
+             ('$id_usuario', '$login', '$senha')";
+
+banco($server, $user, $password, $db, $consulta);
+
+header("Location: login.php?cadastro=ok");
 exit;
-
 ?>
