@@ -1,119 +1,216 @@
 <?php
 if (!isset($_SESSION)) session_start();
-include "produtos.php";
 
-if (empty($_SESSION["carrinho"])) {
-    $_SESSION["carrinho"] = [];
+include "app/cons.php";
+require_once "app/DLL.php";
+
+if (empty($_SESSION["logado"])) {
+    header("Location: login.php");
+    exit;
 }
 
-if (isset($_POST["b_adicionar"])) {
-    $idProduto = (int)($_POST["produto_id"] ?? 0);
+$id_usuario = $_SESSION["id_usuario"];
 
-    if (empty($_SESSION["logado"])) {
-        if (isset($produtos[$idProduto])) {
-            $_SESSION["adicionar_pendente"] = $idProduto;
+if (isset($_GET["id"])) {
+
+    $id_produto = (int)$_GET["id"];
+
+    $consulta = "SELECT id_produto
+                 FROM produto
+                 WHERE id_produto = '$id_produto'";
+
+    $resultado = banco($server, $user, $password, $db, $consulta);
+
+    if ($resultado->num_rows > 0) {
+
+        $consulta = "SELECT id_carrinho
+                     FROM carrinho
+                     WHERE id_usuario = '$id_usuario'
+                     AND id_produto = '$id_produto'";
+
+        $resultado = banco($server, $user, $password, $db, $consulta);
+
+        if ($resultado->num_rows == 0) {
+
+            $consulta = "INSERT INTO carrinho
+                         (id_usuario, id_produto, quantidade)
+                         VALUES
+                         ('$id_usuario', '$id_produto', '1')";
+
+            banco($server, $user, $password, $db, $consulta);
         }
-        header("Location: login.php");
-        exit;
     }
 
-    if (isset($produtos[$idProduto])) {
-        $_SESSION["carrinho"][] = $idProduto;
-    }
+    header("Location: carrinho.php");
+    exit;
 }
 
-if (isset($_POST["b_remover"])) {
-    $idProduto = (int)($_POST["produto_id"] ?? 0);
-    $novoCarrinho = [];
-    $removido = false;
-    foreach ($_SESSION["carrinho"] as $id) {
-        if ($id == $idProduto && $removido == false) {
-            $removido = true;
-        } else {
-            $novoCarrinho[] = $id;
-        }
-    }
-    $_SESSION["carrinho"] = $novoCarrinho;
+if (isset($_GET["remover"])) {
+
+    $id_carrinho = (int)$_GET["remover"];
+
+    $consulta = "DELETE FROM carrinho
+                 WHERE id_carrinho = '$id_carrinho'
+                 AND id_usuario = '$id_usuario'";
+
+    banco($server, $user, $password, $db, $consulta);
+
+    header("Location: carrinho.php");
+    exit;
 }
 
-if (isset($_POST["b_limpar"])) {
-    $_SESSION["carrinho"] = [];
+$consulta = "SELECT carrinho.id_carrinho,
+                    carrinho.id_produto,
+                    carrinho.quantidade,
+                    produto.nome,
+                    produto.descricao,
+                    produto.preco,
+                    produto.imagem
+             FROM carrinho
+             INNER JOIN produto
+             ON carrinho.id_produto = produto.id_produto
+             WHERE carrinho.id_usuario = '$id_usuario'
+             ORDER BY carrinho.id_carrinho DESC";
+
+$resultado = banco($server, $user, $password, $db, $consulta);
+
+$produtos = [];
+
+while ($produto = $resultado->fetch_assoc()) {
+    $produtos[] = $produto;
 }
 ?>
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <title>Carrinho - PoubreSteam</title>
-    <link rel="stylesheet" href="css/style.css?v=4">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PoubreSteam - Carrinho</title>
+<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+
 <header class="topo">
-    <div class="marca">
-        <img src="img/steam-logo.png" alt="Logo" class="logo-site">
-        <div><h1>PoubreSteam</h1><p>Carrinho de compras</p></div>
-    </div>
-    <nav class="menu-principal">
-        <a href="index.php">Loja</a>
-        <a href="carrinho.php">Carrinho</a>
-        <a href="biblioteca.php">Biblioteca</a>
-        <a href="sobre.php">Sobre</a>
-    </nav>
-    <div class="area-login">
-        <?php if (!empty($_SESSION["logado"])): ?>
-            <p class="texto-usuario">Olá, <?= htmlspecialchars($_SESSION["nome"]) ?></p>
-            <a href="logout.php" class="botao-secundario">Sair</a>
-        <?php else: ?>
-            <a href="login.php" class="botao-secundario">Login</a>
-        <?php endif; ?>
-    </div>
+<nav class="menu">
+
+<a href="index.php" class="logo">
+            <img src="img/steam-logo.png" alt="Logo PoubreSteam">
+                <span>PoubreSteam</span>
+</a>
+
+<div class="menu-links">
+<a href="index.php">Loja</a>
+<a href="produtos.php">Produtos</a>
+<a href="carrinho.php">Carrinho</a>
+<a href="biblioteca.php">Biblioteca</a>
+<a href="sobre.php">Sobre</a>
+
+<?php if (!empty($_SESSION["logado"])) { ?>
+<a href="logout.php">Sair</a>
+<?php } else { ?>
+<a href="login.php">Login</a>
+<a href="cadastro1.php">Cadastro</a>
+<?php } ?>
+
+</div>
+
+<form class="busca" action="produtos.php" method="get">
+<input type="text" name="busca" placeholder="Buscar na loja">
+<button type="submit">🔍</button>
+</form>
+
+</nav>
 </header>
 
-<main class="conteudo-principal pagina-carrinho">
-    <h2 class="titulo-secao">Seu carrinho</h2>
+<main class="conteudo">
 
-    <?php if (empty($_SESSION["carrinho"])): ?>
-        <div class="painel-vazio">
-            <h3>Carrinho vazio</h3>
-            <p>Volte para a loja e escolha pelo menos um jogo.</p>
-            <a href="index.php" class="botao-principal atalho-botao">Ir para a loja</a>
-        </div>
-    <?php else: ?>
-        <?php $total = 0; ?>
-        <div class="lista-carrinho">
-            <?php foreach ($_SESSION["carrinho"] as $id): ?>
-                <?php if (isset($produtos[$id])): ?>
-                    <?php $total = $total + $produtos[$id]["preco"]; ?>
-                    <div class="item-carrinho">
-                        <img src="<?= htmlspecialchars($produtos[$id]["imagem"]) ?>" alt="<?= htmlspecialchars($produtos[$id]["nome"]) ?>">
-                        <div>
-                            <h3><?= htmlspecialchars($produtos[$id]["nome"]) ?></h3>
-                            <p><?= htmlspecialchars($produtos[$id]["descricao"]) ?></p>
-                        </div>
-                        <strong>R$ <?= number_format($produtos[$id]["preco"], 2, ",", ".") ?></strong>
-                        <form action="carrinho.php" method="POST">
-                            <input type="hidden" name="produto_id" value="<?= $id ?>">
-                            <button type="submit" name="b_remover" class="botao-remover">Remover</button>
-                        </form>
-                    </div>
-                <?php endif; ?>
-            <?php endforeach; ?>
-        </div>
+<section class="titulo-secao">
+<h2>Seu carrinho</h2>
+</section>
 
-        <section class="resumo-carrinho">
-            <h3>Total: R$ <?= number_format($total, 2, ",", ".") ?></h3>
-            <form action="carrinho.php" method="POST">
-                <button type="submit" name="b_limpar" class="botao-secundario">Limpar carrinho</button>
-            </form>
-            <form action="<?= !empty($_SESSION["logado"]) ? "confirmar.php" : "login.php" ?>" method="POST">
-                <button type="submit" name="b_finalizar" class="botao-principal">Finalizar compra</button>
-            </form>
-        </section>
-    <?php endif; ?>
+<?php if (!empty($produtos)) { ?>
+
+<div class="produtos">
+
+<?php
+$total = 0;
+
+foreach ($produtos as $produto) {
+    extract($produto);
+
+    $subtotal = $preco * $quantidade;
+    $total += $subtotal;
+?>
+
+<article class="card">
+
+<img class="card-imagem"
+     src="<?php echo $imagem; ?>"
+     alt="<?php echo htmlspecialchars($nome); ?>">
+
+<div class="card-conteudo">
+
+<h3><?php echo htmlspecialchars($nome); ?></h3>
+
+<p class="card-descricao">
+<?php echo htmlspecialchars($descricao); ?>
+</p>
+
+<p>
+Quantidade: <?php echo $quantidade; ?>
+</p>
+
+<div class="card-rodape">
+
+<span class="card-preco">
+R$ <?php echo number_format($subtotal, 2, ',', '.'); ?>
+</span>
+
+<a href="carrinho.php?remover=<?php echo $id_carrinho; ?>"
+   class="card-botao">
+Remover
+</a>
+
+</div>
+
+</div>
+
+</article>
+
+<?php } ?>
+
+</div>
+
+<section class="titulo-secao">
+<h2>Total: R$ <?php echo number_format($total, 2, ',', '.'); ?></h2>
+
+<br>
+
+<a href="confirmar.php" class="botao">
+Continuar para compra
+</a>
+</section>
+
+<?php } else { ?>
+
+<div class="card">
+<div class="card-conteudo">
+<h3>Seu carrinho está vazio.</h3>
+<p>Adicione jogos da loja para comprá-los depois.</p>
+<br>
+<a href="produtos.php" class="botao">
+Ir para a loja
+</a>
+</div>
+</div>
+
+<?php } ?>
+
 </main>
 
-<footer>
-    <p>PoubreSteam &copy; 2026 - Todos os direitos reservados.</p>
+<footer class="rodape">
+PoubreSteam © 2026 - Loja de jogos
 </footer>
+
 </body>
 </html>
