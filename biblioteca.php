@@ -1,122 +1,382 @@
 <?php
-if(!isset($_SESSION)) session_start();
+
+if (!isset($_SESSION)) {
+    session_start();
+}
 
 include "app/cons.php";
 require_once "app/DLL.php";
 
-if(empty($_SESSION["logado"])){
-    header("Location: login.php");
+
+if (
+    empty($_SESSION["logado"]) ||
+    empty($_SESSION["adm"])
+) {
+    header("Location: index.php");
     exit;
 }
 
-$compras=[];
-
-$consulta="SELECT v.*,p.nome AS nome_produto,p.imagem
-FROM vendas v
-INNER JOIN usuario u ON v.id_usuario=u.id_usuario
-INNER JOIN produto p ON v.id_produto=p.id_produto
-WHERE u.cpf='{$_SESSION["cpf"]}'
-ORDER BY v.id_venda DESC";
-
-$resultado=banco($server,$user,$password,$db,$consulta);
-
-while($venda=$resultado->fetch_assoc()){
-    $compras[]=$venda;
-}
 ?>
 
 <!DOCTYPE html>
-<html lang="pt-BR">
+
+<html lang="pt-br">
+
 <head>
-<meta charset="UTF-8">
-<title>Biblioteca - PoubreSteam</title>
-<link rel="stylesheet" href="css/style.css?v=4">
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Administrador - PoubreSteam</title>
+
+    <link
+        rel="stylesheet"
+        href="css/style.css"
+    >
+
 </head>
+
 
 <body>
 
-<header class="topo">
 
-<div class="marca">
-<img src="img/steam-logo.png" alt="Logo" class="logo-site">
+<main class="conteudo">
 
-<div>
-<h1>PoubreSteam</h1>
-<p>Biblioteca</p>
-</div>
 
-</div>
+    <section class="titulo-secao">
 
-<nav class="menu-principal">
-<a href="index.php">Loja</a>
-<a href="carrinho.php">Carrinho</a>
-<a href="biblioteca.php">Biblioteca</a>
-<a href="sobre.php">Sobre</a>
-</nav>
+        <h2>Adicionar novo produto</h2>
 
-<div class="area-login">
-<p class="texto-usuario"><?=htmlspecialchars($_SESSION["nome"])?></p>
-<a href="logout.php" class="botao-secundario">Sair</a>
-</div>
+    </section>
 
-</header>
 
-<main class="conteudo-principal">
+    <?php if (
+        isset($_GET["ok"]) &&
+        $_GET["ok"] == "1"
+    ) { ?>
 
-<h2 class="titulo-secao">Sua biblioteca</h2>
+        <div class="card mensagem-sucesso">
 
-<?php if(empty($compras)): ?>
+            <div class="card-conteudo">
 
-<div class="painel-vazio">
-<h3>Nenhuma compra registrada ainda.</h3>
-<p>Quando você finalizar uma compra, ela aparecerá aqui.</p>
-</div>
+                <p>
+                    Produto adicionado com sucesso ao banco de dados.
+                </p>
 
-<?php else: ?>
+            </div>
 
-<div class="grade-biblioteca">
+        </div>
 
-<?php foreach($compras as $compra): ?>
+        <br>
 
-<div class="cartao-biblioteca">
+    <?php } ?>
 
-<img src="<?=htmlspecialchars($compra["imagem"])?>" alt="<?=htmlspecialchars($compra["nome_produto"])?>">
 
-<h3><?=htmlspecialchars($compra["nome_produto"])?></h3>
+    <?php if (isset($_GET["erro"])) { ?>
 
-<p>
-<strong>Venda:</strong>
-<?=htmlspecialchars($compra["numero_venda"])?>
-</p>
+        <div class="card mensagem-erro">
 
-<p>
-<strong>Quantidade:</strong>
-<?=htmlspecialchars($compra["quantidade"])?>
-</p>
+            <div class="card-conteudo">
 
-<p>
-<strong>Total:</strong>
-R$ <?=number_format($compra["valor_total"],2,",",".")?>
-</p>
+                <p>
+                    Não foi possível adicionar o produto.
+                    Confira os dados e tente novamente.
+                </p>
 
-<p>
-<strong>Data:</strong>
-<?=htmlspecialchars($compra["data_hora"])?>
-</p>
+            </div>
 
-</div>
+        </div>
 
-<?php endforeach; ?>
+        <br>
 
-</div>
+    <?php } ?>
 
-<?php endif; ?>
+
+    <form
+        action="salvar_produto.php"
+        method="post"
+        class="form-adm"
+    >
+
+        <div class="card">
+
+            <div class="card-conteudo">
+
+
+                <div class="campo-adm">
+
+                    <label for="nome">
+                        Nome do produto
+                    </label>
+
+                    <input
+                        type="text"
+                        id="nome"
+                        name="nome"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="campo-adm">
+
+                    <label for="descricao">
+                        Descrição
+                    </label>
+
+                    <textarea
+                        id="descricao"
+                        name="descricao"
+                        rows="4"
+                        required
+                    ></textarea>
+
+                </div>
+
+
+                <div class="campo-adm">
+
+                    <label for="preco">
+                        Preço
+                    </label>
+
+                    <input
+                        type="number"
+                        id="preco"
+                        name="preco"
+                        step="0.01"
+                        min="0"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="campo-adm">
+
+                    <label for="imagem">
+                        Nome completo do arquivo da imagem
+                    </label>
+
+                    <input
+                        type="text"
+                        id="imagem"
+                        name="imagem"
+                        placeholder="Ex.: jogo.jpg ou img/jogo.jpg"
+                        required
+                    >
+
+                    <p class="ajuda-form">
+                        Coloque depois o arquivo dentro da pasta
+                        <strong>img</strong>.
+                        Se informar somente o nome, o sistema acrescentará
+                        <strong>img/</strong> automaticamente.
+                    </p>
+
+                </div>
+
+
+                <div class="campo-adm">
+
+                    <label for="desenvolvedora">
+                        Desenvolvedora
+                    </label>
+
+                    <input
+                        type="text"
+                        id="desenvolvedora"
+                        name="desenvolvedora"
+                    >
+
+                </div>
+
+
+                <div class="campo-adm">
+
+                    <label for="publicadora">
+                        Publicadora
+                    </label>
+
+                    <input
+                        type="text"
+                        id="publicadora"
+                        name="publicadora"
+                    >
+
+                </div>
+
+
+                <div class="campo-adm">
+
+                    <label for="genero">
+                        Gênero
+                    </label>
+
+                    <input
+                        type="text"
+                        id="genero"
+                        name="genero"
+                    >
+
+                </div>
+
+
+                <div class="campo-adm">
+
+                    <label for="plataformas">
+                        Plataformas
+                    </label>
+
+                    <input
+                        type="text"
+                        id="plataformas"
+                        name="plataformas"
+                    >
+
+                </div>
+
+
+                <div class="campo-adm">
+
+                    <label for="tamanho">
+                        Tamanho
+                    </label>
+
+                    <input
+                        type="text"
+                        id="tamanho"
+                        name="tamanho"
+                        placeholder="Ex.: 70 GB"
+                    >
+
+                </div>
+
+
+                <div class="campo-adm">
+
+                    <label for="versao">
+                        Versão
+                    </label>
+
+                    <input
+                        type="text"
+                        id="versao"
+                        name="versao"
+                        placeholder="Ex.: 1.0"
+                    >
+
+                </div>
+
+
+                <div class="campo-adm">
+
+                    <label for="classificacao">
+                        Classificação
+                    </label>
+
+                    <input
+                        type="text"
+                        id="classificacao"
+                        name="classificacao"
+                        placeholder="Ex.: 16 anos"
+                    >
+
+                </div>
+
+
+                <div class="campo-adm">
+
+                    <label for="idiomas">
+                        Idiomas
+                    </label>
+
+                    <input
+                        type="text"
+                        id="idiomas"
+                        name="idiomas"
+                    >
+
+                </div>
+
+
+                <div class="campo-adm">
+
+                    <label for="modo">
+                        Modo
+                    </label>
+
+                    <input
+                        type="text"
+                        id="modo"
+                        name="modo"
+                    >
+
+                </div>
+
+
+                <div class="campo-adm">
+
+                    <label for="data_lancamento">
+                        Ano de lançamento
+                    </label>
+
+                    <input
+                        type="number"
+                        id="data_lancamento"
+                        name="data_lancamento"
+                        min="1900"
+                        max="2100"
+                        placeholder="Ex.: 2026"
+                    >
+
+                </div>
+
+
+                <div class="campo-adm">
+
+                    <label for="licenca">
+                        Licença
+                    </label>
+
+                    <input
+                        type="text"
+                        id="licenca"
+                        name="licenca"
+                    >
+
+                </div>
+
+
+                <button
+                    type="submit"
+                    class="botao"
+                >
+                    Adicionar produto
+                </button>
+
+
+            </div>
+
+        </div>
+
+    </form>
+
 
 </main>
 
-<footer>
-<p>PoubreSteam &copy; 2026 - Todos os direitos reservados.</p>
+
+<footer class="rodape">
+
+    PoubreSteam © 2026 - Loja de jogos
+
 </footer>
 
+
 </body>
+
 </html>
