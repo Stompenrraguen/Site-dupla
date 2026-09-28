@@ -22,23 +22,36 @@ if (
 
 <html lang="pt-br">
 
-<head>
+<header class="topo">
+    <nav class="menu">
 
-    <meta charset="UTF-8">
+        <a href="index.php" class="logo">
+            <img src="img/steam-logo.png" alt="Logo PoubreSteam">
+                <span>PoubreSteam</span>
+        </a>
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+        <div class="menu-links">
+            <a href="index.php">Loja</a>
+            <a href="produtos.php">Produtos</a>
+            <a href="carrinho.php">Carrinho</a>
+            <a href="biblioteca.php">Biblioteca</a>
+            <a href="sobre.php">Sobre</a>
 
-    <title>Administrador - PoubreSteam</title>
+            <?php if (!empty($_SESSION["logado"])) { ?>
+                <a href="logout.php">Sair</a>
+            <?php } else { ?>
+                <a href="login.php">Login</a>
+                <a href="cadastro1.php">Cadastro</a>
+            <?php } ?>
+        </div>
 
-    <link
-        rel="stylesheet"
-        href="css/style.css"
-    >
+        <form class="busca" action="produtos.php" method="get">
+            <input type="text" name="busca" placeholder="Buscar na loja">
+            <button type="submit">🔍</button>
+        </form>
 
-</head>
+    </nav>
+</header>
 
 
 <body>
