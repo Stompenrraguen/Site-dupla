@@ -23,8 +23,8 @@ CREATE TABLE usuario (
     id_usuario INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(150) NOT NULL,
     cpf CHAR(11) NOT NULL UNIQUE
+    email VARCHAR(254) UNIQUE NOT NULL
 ) ENGINE=InnoDB;
-
 
 -- ============================================================
 -- 3. TABELA ENDERECO
