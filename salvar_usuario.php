@@ -11,6 +11,13 @@ if ($_SERVER["REQUEST_METHOD"] != "POST") {
 
 extract($_POST);
 
+$email = strtolower(trim($email));
+
+if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    echo "E-mail inválido.";
+    exit;
+}
+
 $cpf = preg_replace("/[^0-9]/", "", $cpf);
 $cep = preg_replace("/[^0-9]/", "", $cep);
 $estado = strtoupper(trim($estado));
@@ -30,8 +37,8 @@ $cep = addslashes($cep);
 $login = addslashes(trim($login));
 $senha = addslashes($senha);
 
-$consulta = "INSERT INTO usuario (nome, cpf)
-             VALUES ('$nome', '$cpf')";
+$consulta = "INSERT INTO usuario (nome, cpf, email)
+             VALUES ('$nome', '$cpf' '$email')";
 
 banco($server, $user, $password, $db, $consulta);
 
