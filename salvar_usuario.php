@@ -38,7 +38,7 @@ $login = addslashes(trim($login));
 $senha = addslashes($senha);
 
 $consulta = "INSERT INTO usuario (nome, cpf, email)
-             VALUES ('$nome', '$cpf' '$email')";
+             VALUES ('$nome', '$cpf', '$email')";
 
 banco($server, $user, $password, $db, $consulta);
 
