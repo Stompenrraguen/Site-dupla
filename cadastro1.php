@@ -18,6 +18,9 @@ if (!isset($_SESSION)) session_start();
         <label>Nome completo</label>
         <input type="text" name="nome" required>
 
+        <label>E-mail</label>
+        <input type="email" name="email" required maxlength="254" placeholder="seuemail@exemplo.com">
+
         <label>CPF</label>
         <input type="text" name="cpf" required maxlength="14" placeholder="000.000.000-00">
 
