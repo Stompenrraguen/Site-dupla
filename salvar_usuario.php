@@ -3,6 +3,7 @@ if (!isset($_SESSION)) session_start();
 
 include "app/cons.php";
 require_once "app/DLL.php";
+require_once "app/enviar_verificacao.php";
 
 if ($_SERVER["REQUEST_METHOD"] != "POST") {
     header("Location: cadastro1.php");
@@ -18,6 +19,9 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     exit;
 }
 
+$emailEnvio = $email;
+$token = bin2hex(random_bytes(32));
+$tokenHash = hash('sha256', $token);
 $cpf = preg_replace("/[^0-9]/", "", $cpf);
 $cep = preg_replace("/[^0-9]/", "", $cep);
 $estado = strtoupper(trim($estado));
@@ -37,8 +41,12 @@ $cep = addslashes($cep);
 $login = addslashes(trim($login));
 $senha = addslashes($senha);
 
-$consulta = "INSERT INTO usuario (nome, cpf, email)
-             VALUES ('$nome', '$cpf', '$email')";
+$email = addslashes($email);
+
+$consulta = "INSERT INTO usuario
+(nome, cpf, email, email_verificado, token_verificacao)
+VALUES
+('$nome', '$cpf', '$email', 0, '$tokenHash')";
 
 banco($server, $user, $password, $db, $consulta);
 
@@ -70,7 +78,15 @@ $consulta = "INSERT INTO login
              ('$id_usuario', '$login', '$senha')";
 
 banco($server, $user, $password, $db, $consulta);
+if (enviarVerificacao($emailEnvio, stripslashes($nome), $token)) {
 
-header("Location: login.php?cadastro=ok");
-exit;
+    header("Location: login.php?cadastro=email_enviado");
+    exit;
+
+} else {
+
+    echo "Cadastro realizado, mas não foi possível enviar o e-mail. Verifique a configuração SMTP.";
+    exit;
+
+}
 ?>
