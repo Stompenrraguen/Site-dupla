@@ -8,8 +8,8 @@ use PHPMailer\PHPMailer\Exception;
 
 function enviarVerificacao($destinatario, $nome, $token) {
 
-    $config = require 'C:/xampp/config/smtp.php';
-
+    $config = require __DIR__ . '/../config/smtp.php';
+    
     $mail = new PHPMailer(true);
 
     try {
