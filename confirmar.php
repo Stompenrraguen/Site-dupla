@@ -1,292 +1,224 @@
 <?php
 if (!isset($_SESSION)) session_start();
-
 include "app/cons.php";
 require_once "app/DLL.php";
-
+include "produtos.php";
 if (empty($_SESSION["logado"])) {
     header("Location: login.php");
     exit;
 }
+if (isset($_POST["b_comprar"]) && !empty($_POST["produto_id"])) {
+    $_SESSION["produto_pendente"] = (int)$_POST["produto_id"];
+}
+$itensCompra = [];
+if (!empty($_SESSION["produto_pendente"])) {
 
+    $idProduto = $_SESSION["produto_pendente"];
+
+    if (isset($produtos[$idProduto])) {
+        $itensCompra[] = $idProduto;
+    }
+} else if (!empty($_SESSION["carrinho"])) {
+
+    $itensCompra = $_SESSION["carrinho"];
+}
+if (empty($itensCompra)) {
+    header("Location: index.php");
+    exit;
+}
+$usuario = $_SESSION["usuario"];
 $id_usuario = $_SESSION["id_usuario"];
+$consulta_endereco = "SELECT *
+                      FROM endereco
+                      WHERE id_usuario = '$id_usuario'";
 
-$consulta = "SELECT nome, endereco, bairro, cidade, estado, cep
-             FROM usuario
-             INNER JOIN endereco
-             ON usuario.id_usuario = endereco.id_usuario
-             WHERE usuario.id_usuario = '$id_usuario'";
+$resultado_endereco = banco(
+    $server,
+    $user,
+    $password,
+    $db,
+    $consulta_endereco
+);
+$endereco = $resultado_endereco->fetch_assoc();
+if (!$endereco) {
 
-$resultado = banco($server, $user, $password, $db, $consulta);
-
-if (!$resultado || $resultado->num_rows == 0) {
-    echo "Não foi possível localizar o endereço da sua conta.";
-    exit;
+    $endereco = [
+        "endereco" => "",
+        "bairro" => "",
+        "cidade" => "",
+        "estado" => "",
+        "cep" => ""
+    ];
 }
-
-$dados_usuario = $resultado->fetch_assoc();
-
-extract($dados_usuario);
-
-$nome_usuario = $nome;
-
-$consulta = "SELECT carrinho.id_carrinho,
-                    carrinho.id_produto,
-                    carrinho.quantidade,
-                    produto.nome,
-                    produto.preco,
-                    produto.imagem
-             FROM carrinho
-             INNER JOIN produto
-             ON carrinho.id_produto = produto.id_produto
-             WHERE carrinho.id_usuario = '$id_usuario'
-             ORDER BY carrinho.id_carrinho DESC";
-
-$resultado = banco($server, $user, $password, $db, $consulta);
-
-$produtos = [];
 $total = 0;
-
-while ($produto = $resultado->fetch_assoc()) {
-
-    $produtos[] = $produto;
-
-    $total += $produto["preco"] * $produto["quantidade"];
-}
-
-if (empty($produtos)) {
-    header("Location: carrinho.php");
-    exit;
-}
 ?>
-
 <!DOCTYPE html>
-<html lang="pt-br">
-
+<html lang="pt-BR">
 <head>
-
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>PoubreSteam - Confirmar compra</title>
-
-<link rel="stylesheet" href="css/style.css">
-
+    <meta charset="UTF-8">
+    <title>Confirmar Compra - PoubreSteam</title>
+    <link rel="stylesheet" href="css/style.css?v=4">
 </head>
-
 <body>
-
 <header class="topo">
-
-<nav class="menu">
-
-<a href="index.php" class="logo">
-            <img src="img/steam-logo.png" alt="Logo PoubreSteam">
-                <span>PoubreSteam</span>    
-</a>
-
-<div class="menu-links">
-
-<a href="index.php">Loja</a>
-<a href="produtos.php">Produtos</a>
-<a href="carrinho.php">Carrinho</a>
-<a href="biblioteca.php">Biblioteca</a>
-<a href="sobre.php">Sobre</a>
-<a href="logout.php">Sair</a>
-
-</div>
-
-<form class="busca" action="produtos.php" method="get">
-
-<input
-type="text"
-name="busca"
-placeholder="Buscar na loja"
->
-
-<button type="submit">🔍</button>
-
-</form>
-
-</nav>
-
+    <div class="marca">
+        <img
+            src="img/steam-logo.png"
+            alt="Logo"
+            class="logo-site">
+        <div>
+            <h1>PoubreSteam</h1>
+            <p>Confirmação de compra</p>
+        </div>
+    </div>
+    <nav class="menu-principal">
+        <a href="index.php">Loja</a>
+        <a href="carrinho.php">Carrinho</a>
+        <a href="biblioteca.php">Biblioteca</a>
+        <a href="sobre.php">Sobre</a>
+    </nav>
+    <div class="area-login">
+        <p class="texto-usuario">
+            <?= htmlspecialchars($_SESSION["nome"]) ?>
+        </p>
+        <a
+            href="logout.php"
+            class="botao-secundario">
+            Sair
+        </a>
+    </div>
 </header>
+<main class="conteudo-principal confirmar-layout">
+    <section class="cartao-confirmacao">
+        <h2>Produto escolhido</h2>
+        <?php foreach ($itensCompra as $id): ?>
+            <?php if (isset($produtos[$id])): ?>
+                <?php
+                $total = $total + $produtos[$id]["preco"];
+                ?>
+                <div class="produto-confirmar">
 
-<main class="conteudo">
+                    <img
+                        src="<?= $produtos[$id]["imagem"] ?>"
+                        alt="<?= htmlspecialchars($produtos[$id]["nome"]) ?>">
+                    <div>
+                        <h3>
+                            <?= htmlspecialchars($produtos[$id]["nome"]) ?>
+                        </h3>
+                        <p>
+                            <?= htmlspecialchars($produtos[$id]["descricao"]) ?>
+                        </p>
+                        <strong>
+                            R$
+                            <?= number_format(
+                                $produtos[$id]["preco"],
+                                2,
+                                ",",
+                                "."
+                            ) ?>
+                        </strong>
+                    </div>
+                </div>
+            <?php endif; ?>
+        <?php endforeach; ?>
+        <strong class="preco-grande">
 
-<section class="titulo-secao">
+            Total:
+            R$
+            <?= number_format(
+                $total,
+                2,
+                ",",
+                "."
+            ) ?>
 
-<h2>Confirmar compra</h2>
+        </strong>
 
-</section>
+    </section>
 
+    <section class="cartao-confirmacao">
 
-<div class="card">
+        <h2>Dados do comprador</h2>
+        <p>
+            <strong>Nome:</strong>
+            <?= htmlspecialchars($usuario["nome"]) ?>
+        </p>
+        <p>
+            <strong>CPF:</strong>
+            <?= htmlspecialchars($usuario["cpf"]) ?>
+        </p>
+        <p>
+            <strong>Endereço:</strong>
+            <?= htmlspecialchars($endereco["endereco"]) ?>
+        </p>
+        <p>
+            <strong>Bairro:</strong>
+            <?= htmlspecialchars($endereco["bairro"]) ?>
+        </p>
+        <p>
+            <strong>Cidade:</strong>
+            <?= htmlspecialchars($endereco["cidade"]) ?>
+        </p>
+        <p>
+            <strong>Estado:</strong>
+            <?= htmlspecialchars($endereco["estado"]) ?>
+        </p>
+        <p>
+            <strong>CEP:</strong>
+            <?= htmlspecialchars($endereco["cep"]) ?>
+        </p>
+        <form
+            action="salvar_venda.php"
+            method="POST">
+            <label>
+                Forma de pagamento
+            </label>
+            <select
+                name="pagamento"
+                required>
+                <option value="">
+                    Selecione
+                </option>
 
-<div class="card-conteudo">
+                <option value="Pix">
+                    Pix
+                </option>
+                <option value="Cartão de Crédito">
+                    Cartão de Crédito
+                </option>
+                <option value="Boleto">
+                    Boleto
+                </option>
+                <option value="Saldo PoubreSteam">
+                    Saldo PoubreSteam
+                </option>
+            </select>
+            <button
+                type="submit"
+                name="b1"
+                class="botao-principal"
+            >
+                Confirmar compra
+            </button>
 
-<h3>Jogos da compra</h3>
+        </form>
 
-<?php foreach ($produtos as $produto) { ?>
-
-<?php extract($produto); ?>
-
-<p>
-
-<strong>
-<?php echo htmlspecialchars($nome); ?>
-</strong>
-
-—
-
-<?php echo $quantidade; ?> unidade(s)
-
-—
-
-R$
-
-<?php echo number_format(
-    $preco * $quantidade,
-    2,
-    ',',
-    '.'
-); ?>
-
-</p>
-
-<?php } ?>
-
-<br>
-
-<h3>
-
-Total:
-
-R$
-
-<?php echo number_format(
-    $total,
-    2,
-    ',',
-    '.'
-); ?>
-
-</h3>
-
-</div>
-
-</div>
-
-
-<br>
-
-
-<div class="card">
-
-<div class="card-conteudo">
-
-<h3>Dados cadastrados</h3>
-
-<p>
-<strong>Nome:</strong>
-<?php echo htmlspecialchars($nome_usuario); ?>
-</p>
-
-<p>
-<strong>Endereço:</strong>
-<?php echo htmlspecialchars($endereco); ?>
-</p>
-
-<p>
-<strong>Bairro:</strong>
-<?php echo htmlspecialchars($bairro); ?>
-</p>
-
-<p>
-<strong>Cidade:</strong>
-<?php echo htmlspecialchars($cidade); ?>
-</p>
-
-<p>
-<strong>Estado:</strong>
-<?php echo htmlspecialchars($estado); ?>
-</p>
-
-<p>
-<strong>CEP:</strong>
-<?php echo htmlspecialchars($cep); ?>
-</p>
-
-</div>
-
-</div>
-
-
-<br>
-
-
-<form action="finalizar_compra.php" method="post">
-
-<div class="card">
-
-<div class="card-conteudo">
-
-<h3>Forma de pagamento</h3>
-
-<br>
-
-<label for="forma_pagamento">
-Escolha:
-</label>
-
-<br>
-
-<select
-name="forma_pagamento"
-id="forma_pagamento"
-required
->
-
-<option value="">
-Selecione
-</option>
-
-<option value="Pix">
-Pix
-</option>
-
-<option value="Cartão">
-Cartão
-</option>
-
-<option value="Boleto">
-Boleto
-</option>
-
-</select>
-
-<br><br>
-
-<input
-type="submit"
-value="Finalizar compra"
-class="botao"
->
-
-</div>
-
-</div>
-
-</form>
+    </section>
 
 </main>
 
-<footer class="rodape">
 
-PoubreSteam © 2026 - Loja de jogos
+
+<footer>
+
+    <p>
+        PoubreSteam &copy; 2026 - Todos os direitos reservados.
+    </p>
 
 </footer>
+
 
 </body>
 
 </html>
+

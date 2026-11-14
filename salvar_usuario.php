@@ -1,11 +1,12 @@
 <?php
+
 if (!isset($_SESSION)) session_start();
 
 include "app/cons.php";
 require_once "app/DLL.php";
 require_once "app/enviar_verificacao.php";
 
-if ($_SERVER["REQUEST_METHOD"] != "POST") {
+if (!isset($_POST["b1"])) {
     header("Location: cadastro1.php");
     exit;
 }
@@ -19,74 +20,46 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     exit;
 }
 
-$emailEnvio = $email;
-$token = bin2hex(random_bytes(32));
-$tokenHash = hash('sha256', $token);
-$cpf = preg_replace("/[^0-9]/", "", $cpf);
-$cep = preg_replace("/[^0-9]/", "", $cep);
-$estado = strtoupper(trim($estado));
+$cpf = preg_replace("/[^0-9]/", "", $_POST["cpf"] ?? "");
+$nome = trim($_POST["nome"] ?? "");
 
-if (strlen($cpf) != 11 || strlen($cep) != 8 || strlen($estado) != 2) {
-    echo "Dados inválidos. Verifique CPF, CEP e Estado.";
+$endereco = trim($_POST["endereco"] ?? "");
+$bairro = trim($_POST["bairro"] ?? "");
+$cidade = trim($_POST["cidade"] ?? "");
+$estado = trim($_POST["estado"] ?? "");
+$cep = trim($_POST["cep"] ?? "");
+
+if (empty($nome) || empty($cpf)) {
+    header("Location: cadastro1.php");
     exit;
 }
 
-$nome = addslashes(trim($nome));
-$cpf = addslashes($cpf);
-$endereco = addslashes(trim($endereco));
-$bairro = addslashes(trim($bairro));
-$cidade = addslashes(trim($cidade));
-$estado = addslashes($estado);
-$cep = addslashes($cep);
-$login = addslashes(trim($login));
-$senha = addslashes($senha);
 
-$email = addslashes($email);
-
-$consulta = "INSERT INTO usuario
-(nome, cpf, email, email_verificado, token_verificacao)
+$consulta_usuario = "INSERT INTO usuario
+(nome, cpf)
 VALUES
-('$nome', '$cpf', '$email', 0, '$tokenHash')";
+('$nome', '$cpf')";
 
-banco($server, $user, $password, $db, $consulta);
+banco($server, $user, $password, $db, $consulta_usuario);
 
-$consulta = "SELECT id_usuario
-             FROM usuario
-             WHERE cpf = '$cpf'";
+$consulta_id = "SELECT id_usuario FROM usuario WHERE cpf = '$cpf'";
 
-$resultado = banco($server, $user, $password, $db, $consulta);
+$resultado = banco($server, $user, $password, $db, $consulta_id);
 
-if (!$resultado || $resultado->num_rows == 0) {
-    echo "Não foi possível localizar o usuário cadastrado.";
-    exit;
-}
+$usuario = $resultado->fetch_assoc();
 
-$dados = $resultado->fetch_assoc();
+$id_usuario = $usuario["id_usuario"];
 
-extract($dados);
+$consulta_endereco = "INSERT INTO endereco
+(id_usuario, endereco, bairro, cidade, estado, cep)
+VALUES
+('$id_usuario', '$endereco', '$bairro', '$cidade', '$estado', '$cep')";
 
-$consulta = "INSERT INTO endereco
-             (id_usuario, endereco, bairro, cidade, estado, cep)
-             VALUES
-             ('$id_usuario', '$endereco', '$bairro', '$cidade', '$estado', '$cep')";
+banco($server, $user, $password, $db, $consulta_endereco);
 
-banco($server, $user, $password, $db, $consulta);
+$_SESSION["cpf_cadastro"] = $cpf;
 
-$consulta = "INSERT INTO login
-             (id_usuario, login, senha)
-             VALUES
-             ('$id_usuario', '$login', '$senha')";
+header("Location: cadastro2.php");
+exit;
 
-banco($server, $user, $password, $db, $consulta);
-if (enviarVerificacao($emailEnvio, stripslashes($nome), $token)) {
-
-    header("Location: login.php?cadastro=email_enviado");
-    exit;
-
-} else {
-
-    echo "Cadastro realizado, mas não foi possível enviar o e-mail. Verifique a configuração SMTP.";
-    exit;
-
-}
 ?>

@@ -1,9 +1,3 @@
-
-Site feito usando php, css e html, linkado a um banco de dados MySql, o site possui uma biblioteca que não exige login para ser usada, com uma aba de carrinho e login para realizar compras, site ficticio feito apenas para aprendizado.
-Projeto Escolar ofertado pelos Professores de Programação Web e BD (Banco de Dados).
-
-MODELO FÍSICO DO BANCO DE DADOS:
-```
 -- ============================================================
 -- 1. CRIAÇÃO BANCO
 -- ============================================================
@@ -627,9 +621,5 @@ SELECT
     imagem
 FROM produto
 ORDER BY id_produto;
-
-
-
-```
 
 
