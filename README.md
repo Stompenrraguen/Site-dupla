@@ -22,10 +22,11 @@ USE poubresteam;
 CREATE TABLE usuario (
     id_usuario INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(150) NOT NULL,
-    cpf CHAR(11) NOT NULL UNIQUE
-    email VARCHAR(254) UNIQUE NOT NULL
+    cpf CHAR(11) NOT NULL UNIQUE,
+    email VARCHAR(254) NOT NULL UNIQUE,
+    email_verificado TINYINT(1) NOT NULL DEFAULT 0,
+    token_verificacao CHAR(64) DEFAULT NULL
 ) ENGINE=InnoDB;
-
 -- ============================================================
 -- 3. TABELA ENDERECO
 -- ============================================================
