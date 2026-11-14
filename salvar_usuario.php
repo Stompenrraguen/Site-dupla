@@ -1,5 +1,15 @@
 <?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
+$email = $_SESSION['dados_cadastro']['email'] ?? ($_POST['email'] ?? '');
+
+$email = strtolower(trim($email));
+
+if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    die("E-mail inválido.");
+}
 if (!isset($_SESSION)) session_start();
 
 include "app/cons.php";
