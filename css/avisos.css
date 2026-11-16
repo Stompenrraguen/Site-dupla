@@ -1,0 +1,16 @@
+.aviso {
+    position: relative;
+    width: min(900px, calc(100% - 32px));
+    margin: 18px auto;
+    padding: 14px 48px 14px 16px;
+    border: 1px solid currentColor;
+    border-radius: 6px;
+    font-weight: 700;
+    box-shadow: 0 5px 16px rgba(0, 0, 0, .25);
+    transition: opacity .3s ease, transform .3s ease;
+}
+.aviso.sucesso { color: #155724; background: #d4edda; }
+.aviso.erro { color: #721c24; background: #f8d7da; }
+.aviso.info { color: #0c5460; background: #d1ecf1; }
+.aviso-fechar { position: absolute; top: 5px; right: 10px; border: 0; background: transparent; color: inherit; font-size: 1.6rem; }
+.aviso-oculto { opacity: 0; transform: translateY(-8px); }
