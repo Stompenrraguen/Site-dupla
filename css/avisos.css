@@ -12,5 +12,16 @@
 .aviso.sucesso { color: #155724; background: #d4edda; }
 .aviso.erro { color: #721c24; background: #f8d7da; }
 .aviso.info { color: #0c5460; background: #d1ecf1; }
-.aviso-fechar { position: absolute; top: 5px; right: 10px; border: 0; background: transparent; color: inherit; font-size: 1.6rem; }
-.aviso-oculto { opacity: 0; transform: translateY(-8px); }
+.aviso-fechar {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font-size: 1.6rem;
+}
+.aviso-oculto {
+    opacity: 0;
+    transform: translateY(-8px);
+}
