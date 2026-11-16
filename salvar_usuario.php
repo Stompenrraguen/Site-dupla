@@ -1,4 +1,3 @@
-
 <?php
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -7,59 +6,99 @@ if (session_status() === PHP_SESSION_NONE) {
 include "app/cons.php";
 require_once "app/DLL.php";
 
-if ($_SERVER["REQUEST_METHOD"] !== "POST" || !isset($_POST["b1"])) {
+extract($_POST, EXTR_SKIP);
+
+if ($_SERVER["REQUEST_METHOD"] !== "POST" || empty($b1)) {
     header("Location: cadastro1.php");
     exit;
 }
 
-$nome = trim($_POST["nome"] ?? "");
-$email = strtolower(trim($_POST["email"] ?? ""));
-$cpf = preg_replace("/[^0-9]/", "", $_POST["cpf"] ?? "");
-
-$endereco = trim($_POST["endereco"] ?? "");
-$bairro = trim($_POST["bairro"] ?? "");
-$cidade = trim($_POST["cidade"] ?? "");
-$estado = trim($_POST["estado"] ?? "");
-$cep = trim($_POST["cep"] ?? "");
+$nome = trim($nome ?? "");
+$email = strtolower(trim($email ?? ""));
+$cpf = preg_replace("/[^0-9]/", "", $cpf ?? "");
+$endereco = trim($endereco ?? "");
+$bairro = trim($bairro ?? "");
+$cidade = trim($cidade ?? "");
+$estado = strtoupper(trim($estado ?? ""));
+$cep = preg_replace("/[^0-9]/", "", $cep ?? "");
 
 if (
-    empty($nome) ||
-    empty($cpf) ||
-    !filter_var($email, FILTER_VALIDATE_EMAIL)
+    $nome === "" ||
+    !filter_var($email, FILTER_VALIDATE_EMAIL) ||
+    strlen($cpf) !== 11 ||
+    $endereco === "" ||
+    $bairro === "" ||
+    $cidade === "" ||
+    strlen($estado) !== 2 ||
+    strlen($cep) !== 8
 ) {
-    die("Preencha corretamente os dados do cadastro.");
+    $_SESSION["aviso"] = [
+        "tipo" => "erro",
+        "texto" => "Confira os dados informados. CPF e CEP devem ter 11 e 8 números."
+    ];
+    header("Location: cadastro1.php");
+    exit;
 }
 
-$consulta = "SELECT id_usuario FROM usuario WHERE cpf = '$cpf'";
+$nomeSQL = addslashes($nome);
+$emailSQL = addslashes($email);
+$cpfSQL = addslashes($cpf);
+$enderecoSQL = addslashes($endereco);
+$bairroSQL = addslashes($bairro);
+$cidadeSQL = addslashes($cidade);
+$estadoSQL = addslashes($estado);
+$cepSQL = addslashes($cep);
+
+$consulta = "SELECT id_usuario
+             FROM usuario
+             WHERE cpf = '$cpfSQL' OR email = '$emailSQL'
+             LIMIT 1";
 $resultado = banco($server, $user, $password, $db, $consulta);
 
-if ($resultado && $resultado->num_rows > 0) {
-    die("Este CPF já está cadastrado.");
+if ($resultado->num_rows > 0) {
+    $_SESSION["aviso"] = [
+        "tipo" => "erro",
+        "texto" => "Este CPF ou e-mail já está cadastrado."
+    ];
+    header("Location: cadastro1.php");
+    exit;
 }
 
-$consulta_usuario = "INSERT INTO usuario (nome, cpf, email)
-                     VALUES ('$nome', '$cpf', '$email')";
+$consulta = "INSERT INTO usuario (nome, cpf, email)
+             VALUES ('$nomeSQL', '$cpfSQL', '$emailSQL')";
+banco($server, $user, $password, $db, $consulta);
 
-banco($server, $user, $password, $db, $consulta_usuario);
+$consulta = "SELECT id_usuario
+             FROM usuario
+             WHERE cpf = '$cpfSQL'
+             LIMIT 1";
+$resultado = banco($server, $user, $password, $db, $consulta);
+$usuario = $resultado->fetch_assoc();
 
-$consulta_id = "SELECT id_usuario FROM usuario WHERE cpf = '$cpf'";
-$resultado = banco($server, $user, $password, $db, $consulta_id);
-
-if (!$resultado || !($usuario = $resultado->fetch_assoc())) {
-    die("Não foi possível salvar os dados do usuário.");
+if (!$usuario) {
+    $_SESSION["aviso"] = [
+        "tipo" => "erro",
+        "texto" => "Não foi possível localizar os dados do cadastro."
+    ];
+    header("Location: cadastro1.php");
+    exit;
 }
 
-$id_usuario = $usuario["id_usuario"];
+$idUsuario = (int)$usuario["id_usuario"];
 
-$consulta_endereco = "INSERT INTO endereco
-(id_usuario, endereco, bairro, cidade, estado, cep)
-VALUES
-('$id_usuario', '$endereco', '$bairro', '$cidade', '$estado', '$cep')";
-
-banco($server, $user, $password, $db, $consulta_endereco);
+$consulta = "INSERT INTO endereco
+                (id_usuario, endereco, bairro, cidade, estado, cep)
+             VALUES
+                ('$idUsuario', '$enderecoSQL', '$bairroSQL', '$cidadeSQL',
+                 '$estadoSQL', '$cepSQL')";
+banco($server, $user, $password, $db, $consulta);
 
 $_SESSION["cpf_cadastro"] = $cpf;
 $_SESSION["email_cadastro"] = $email;
+$_SESSION["aviso"] = [
+    "tipo" => "sucesso",
+    "texto" => "Dados pessoais salvos. Agora crie seu login e senha."
+];
 
 header("Location: cadastro2.php");
 exit;
