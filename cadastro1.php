@@ -1,3 +1,4 @@
+
 <?php
 if (!isset($_SESSION)) session_start();
 ?>
@@ -5,8 +6,10 @@ if (!isset($_SESSION)) session_start();
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cadastro - Dados Pessoais</title>
     <link rel="stylesheet" href="css/style.css?v=4">
+    <script src="js/script.js" defer></script>
 </head>
 <body class="pagina-login">
 
@@ -15,31 +18,96 @@ if (!isset($_SESSION)) session_start();
     <p>Informe seus dados pessoais para criar sua conta.</p>
 
     <form action="salvar_usuario.php" method="POST">
-        <label>Nome completo</label>
-        <input type="text" name="nome" required>
 
-        <label>E-mail</label>
-        <input type="email" name="email" required maxlength="254" placeholder="seuemail@exemplo.com">
-        
-        <label>CPF</label>
-        <input type="text" name="cpf" required maxlength="14" placeholder="000.000.000-00">
+        <label for="nome">Nome completo</label>
+        <input
+            type="text"
+            id="nome"
+            name="nome"
+            required
+            maxlength="150"
+            autocomplete="name"
+        >
 
-        <label>Endereço</label>
-        <input type="text" name="endereco" required>
+        <label for="email">E-mail</label>
+        <input
+            type="email"
+            id="email"
+            name="email"
+            required
+            maxlength="254"
+            placeholder="seuemail@exemplo.com"
+            autocomplete="email"
+        >
 
-        <label>Bairro</label>
-        <input type="text" name="bairro" required>
+        <label for="cpf">CPF</label>
+        <input
+            type="text"
+            id="cpf"
+            name="cpf"
+            required
+            maxlength="14"
+            placeholder="000.000.000-00"
+            inputmode="numeric"
+            autocomplete="off"
+        >
 
-        <label>Cidade</label>
-        <input type="text" name="cidade" required>
+        <label for="endereco">Endereço</label>
+        <input
+            type="text"
+            id="endereco"
+            name="endereco"
+            required
+            maxlength="200"
+            autocomplete="street-address"
+        >
 
-        <label>Estado</label>
-        <input type="text" name="estado" required maxlength="2" placeholder="SP">
+        <label for="bairro">Bairro</label>
+        <input
+            type="text"
+            id="bairro"
+            name="bairro"
+            required
+            maxlength="100"
+        >
 
-        <label>CEP</label>
-        <input type="text" name="cep" required placeholder="00000-000">
+        <label for="cidade">Cidade</label>
+        <input
+            type="text"
+            id="cidade"
+            name="cidade"
+            required
+            maxlength="100"
+            autocomplete="address-level2"
+        >
 
-        <button type="submit" name="b1" class="botao-principal">Continuar</button>
+        <label for="estado">Estado</label>
+        <input
+            type="text"
+            id="estado"
+            name="estado"
+            required
+            maxlength="2"
+            placeholder="SP"
+            autocomplete="address-level1"
+        >
+
+        <label for="cep">CEP</label>
+        <input
+            type="text"
+            id="cep"
+            name="cep"
+            required
+            maxlength="9"
+            placeholder="00000-000"
+            inputmode="numeric"
+            autocomplete="postal-code"
+        >
+
+        <button type="submit" name="b1" class="botao-principal">
+            Continuar
+        </button>
+
     </form>
 
     <a href="login.php" class="atalho-voltar">Voltar para o login</a>
