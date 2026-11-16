@@ -1,20 +1,24 @@
 <?php
+include_once __DIR__ . "/app/cons.php";
+require_once __DIR__ . "/app/DLL.php";
 
-include "app/cons.php";
-require_once "app/DLL.php";
+$busca = trim($busca ?? "");
+$buscaSQL = addslashes($busca);
 
-$consulta = "SELECT * FROM produto ORDER BY id_produto";
+$consulta = "SELECT *
+             FROM produto";
 
-$resultado = banco(
-    $server,
-    $user,
-    $password,
-    $db,
-    $consulta
-);
+if ($busca !== "") {
+    $consulta .= " WHERE nome LIKE '%$buscaSQL%'";
+}
+
+$consulta .= " ORDER BY id_produto";
+
+$resultado = banco($server, $user, $password, $db, $consulta);
 
 $produtos = [];
 
 while ($produto = $resultado->fetch_assoc()) {
-    $produtos[$produto["id_produto"]] = $produto;
+    $produtos[(int)$produto["id_produto"]] = $produto;
 }
+?>
