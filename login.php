@@ -19,26 +19,24 @@ if (!empty($b_comprar) && !empty($produto_id)) {
     <link rel="stylesheet" href="css/avisos.css">
 </head>
 <body class="pagina-login">
-    <div class="caixa-formulario">
-        <?php include "avisos.php"; ?>
+<div class="caixa-formulario">
+    <?php include "avisos.php"; ?>
 
-        <h1>Entrar na PoubreSteam</h1>
-        <p>Acesse sua conta para continuar.</p>
+    <h1>Entrar na PoubreSteam</h1>
+    <p>Acesse sua conta para continuar.</p>
 
-        <form action="processa_login.php" method="POST">
-            <label for="login">Login</label>
-            <input id="login" type="text" name="login" required>
+    <form action="processa_login.php" method="POST">
+        <label for="login">Login</label>
+        <input id="login" type="text" name="login" required>
 
-            <label for="senha">Senha</label>
-            <input id="senha" type="password" name="senha" required>
+        <label for="senha">Senha</label>
+        <input id="senha" type="password" name="senha" required>
 
-            <button type="submit" name="b1" value="1" class="botao-principal">
-                Entrar
-            </button>
-        </form>
+        <button type="submit" name="b1" value="1" class="botao-principal">Entrar</button>
+    </form>
 
-        <a href="cadastro1.php" class="atalho-cadastro">Cadastrar novo usuário</a>
-        <a href="index.php" class="atalho-voltar">Voltar para a loja</a>
-    </div>
+    <a href="cadastro1.php" class="atalho-cadastro">Cadastrar novo usuário</a>
+    <a href="index.php" class="atalho-voltar">Voltar para a loja</a>
+</div>
 </body>
 </html>
