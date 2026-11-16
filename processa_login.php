@@ -9,15 +9,15 @@ require_once "app/DLL.php";
 extract($_POST, EXTR_SKIP);
 
 $login = preg_replace("/[^a-zA-Z0-9_]/", "", trim($login ?? ""));
-$senha = trim($senha ?? "");
+$senha = (string)($senha ?? "");
 
-if (empty($b1) || $login === "" || $senha === "") {
+if ($_SERVER["REQUEST_METHOD"] !== "POST" || empty($b1) || $login === "" || $senha === "") {
     $_SESSION["aviso"] = ["tipo" => "erro", "texto" => "Informe o login e a senha."];
     header("Location: login.php");
     exit;
 }
 
-/* Acesso administrativo legado do projeto. */
+/* Credenciais administrativas legadas: substituir por autenticação segura antes de publicar. */
 if ($login === "ADM" && $senha === "555") {
     session_regenerate_id(true);
     $_SESSION["logado"] = true;
@@ -61,11 +61,10 @@ $_SESSION["cpf"] = $dadosLogin["cpf"];
 $_SESSION["nome"] = $dadosLogin["nome"];
 $_SESSION["usuario"] = $dadosLogin;
 
-/* Transfere para o banco o carrinho que estava na sessão antes do login. */
+/* Migra itens adicionados antes do login para o carrinho no MySQL. */
 if (!empty($_SESSION["carrinho"]) && is_array($_SESSION["carrinho"])) {
     foreach ($_SESSION["carrinho"] as $idProdutoSessao) {
         $idProdutoSessao = (int)$idProdutoSessao;
-
         if ($idProdutoSessao <= 0) {
             continue;
         }
@@ -77,17 +76,16 @@ if (!empty($_SESSION["carrinho"]) && is_array($_SESSION["carrinho"])) {
                      ON DUPLICATE KEY UPDATE quantidade = quantidade + 1";
         banco($server, $user, $password, $db, $consulta);
     }
-
     unset($_SESSION["carrinho"]);
 }
 
 if (!empty($_SESSION["adicionar_pendente"])) {
-    $idProdutoPendente = (int)$_SESSION["adicionar_pendente"];
+    $idProduto = (int)$_SESSION["adicionar_pendente"];
 
     $consulta = "INSERT INTO carrinho (id_usuario, id_produto, quantidade)
                  SELECT '" . (int)$_SESSION["id_usuario"] . "', p.id_produto, 1
                  FROM produto p
-                 WHERE p.id_produto = '$idProdutoPendente'
+                 WHERE p.id_produto = '$idProduto'
                  ON DUPLICATE KEY UPDATE quantidade = quantidade + 1";
     banco($server, $user, $password, $db, $consulta);
 
@@ -104,10 +102,8 @@ $_SESSION["aviso"] = ["tipo" => "sucesso", "texto" => "Login realizado com suces
 
 if (!empty($_SESSION["produto_pendente"])) {
     header("Location: confirmar.php");
-} elseif (!empty($_SESSION["id_usuario"])) {
-    header("Location: carrinho.php");
 } else {
-    header("Location: index.php");
+    header("Location: carrinho.php");
 }
 exit;
 ?>
