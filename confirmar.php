@@ -55,7 +55,7 @@ $endereco = $resultadoEndereco->fetch_assoc() ?: ["endereco"=>"", "bairro"=>"", 
     <nav class="menu-principal"><a href="index.php">Loja</a><a href="carrinho.php">Carrinho</a><a href="biblioteca.php">Biblioteca</a><a href="sobre.php">Sobre</a></nav>
     <div class="area-login"><p class="texto-usuario"><?= htmlspecialchars($_SESSION["nome"], ENT_QUOTES, "UTF-8") ?></p><a href="logout.php" class="botao-secundario">Sair</a></div>
 </header>
-<?php include "app/avisos.php"; ?>
+<?php include "avisos.php"; ?>
 <main class="conteudo-principal confirmar-layout">
     <section class="cartao-confirmacao">
         <h2>Produtos escolhidos</h2>
