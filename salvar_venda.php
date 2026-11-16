@@ -1,117 +1,65 @@
 <?php
-
-if (!isset($_SESSION)) {
-    session_start();
-}
-
-include "produtos.php";
+if (!isset($_SESSION)) session_start();
 include "app/cons.php";
 require_once "app/DLL.php";
 
-if (empty($_SESSION["logado"]) || !isset($_POST["b1"])) {
-    header("Location: index.php");
+extract($_POST, EXTR_SKIP);
+if (empty($_SESSION["logado"]) || empty($b1)) {
+    $_SESSION["aviso"] = ["tipo" => "erro", "texto" => "Faça login para concluir a compra."];
+    header("Location: login.php");
     exit;
 }
 
-date_default_timezone_set("America/Sao_Paulo");
+$formasPermitidas = ["Pix", "Cartão de Crédito", "Boleto", "Saldo PoubreSteam"];
+$pagamento = trim($pagamento ?? "");
+if (!in_array($pagamento, $formasPermitidas, true)) {
+    $_SESSION["aviso"] = ["tipo" => "erro", "texto" => "Selecione uma forma de pagamento válida."];
+    header("Location: confirmar.php");
+    exit;
+}
 
-$pagamento = trim($_POST["pagamento"] ?? "");
-$itensCompra = [];
+$idUsuario = (int)$_SESSION["id_usuario"];
+$pagamentoSQL = addslashes($pagamento);
+$numeroBase = "PS" . date("YmdHis") . bin2hex(random_bytes(4));
 
 if (!empty($_SESSION["produto_pendente"])) {
-    $itensCompra[] = $_SESSION["produto_pendente"];
-} else if (!empty($_SESSION["carrinho"])) {
-    $itensCompra = $_SESSION["carrinho"];
-}
-
-if (empty($itensCompra)) {
-    header("Location: index.php");
-    exit;
-}
-$cpf = $_SESSION["cpf"];
-
-$consultaUsuario = "SELECT id_usuario
-                    FROM usuario
-                    WHERE cpf = '$cpf'";
-
-$resultadoUsuario = banco(
-    $server,
-    $user,
-    $password,
-    $db,
-    $consultaUsuario
-);
-
-$usuario = $resultadoUsuario->fetch_assoc();
-
-if (!$usuario) {
-    die("Usuário não encontrado.");
-}
-
-$idUsuario = $usuario["id_usuario"];
-$numeroVenda = date("YmdHis") . rand(100, 999);
-$dataHora = date("Y-m-d H:i:s");
-$nomesProdutos = [];
-$total = 0;
-$quantidades = array_count_values($itensCompra);
-$contador = 0;
-
-foreach ($quantidades as $idProduto => $quantidade) {
-
-    $idProduto = (int)$idProduto;
-
-    if (isset($produtos[$idProduto])) {
-
-        $nomeProduto = $produtos[$idProduto]["nome"];
-        $preco = (float)$produtos[$idProduto]["preco"];
-        $valorTotalProduto = $preco * $quantidade;
-        $nomesProdutos[] = $nomeProduto;
-        $total += $valorTotalProduto;
-        $numeroVendaProduto = $numeroVenda . $contador;
-        $consulta = "INSERT INTO vendas
-        (
-            numero_venda,
-            id_usuario,
-            id_produto,
-            quantidade,
-            valor_unitario,
-            valor_total,
-            forma_pagamento,
-            data_hora
-        )
-        VALUES
-        (
-            '$numeroVendaProduto',
-            '$idUsuario',
-            '$idProduto',
-            '$quantidade',
-            '$preco',
-            '$valorTotalProduto',
-            '$pagamento',
-            '$dataHora'
-        )";
-
-        banco(
-            $server,
-            $user,
-            $password,
-            $db,
-            $consulta
-        );
-
-        $contador++;
+    $idProduto = (int)$_SESSION["produto_pendente"];
+    $consulta = "INSERT INTO vendas (numero_venda, id_usuario, id_produto, quantidade, valor_unitario, valor_total, forma_pagamento)
+                 SELECT CONCAT('$numeroBase', p.id_produto), '$idUsuario', p.id_produto, 1, p.preco, p.preco, '$pagamentoSQL'
+                 FROM produto p WHERE p.id_produto = '$idProduto'";
+    $resultado = banco($server, $user, $password, $db, $consulta);
+    if (!$resultado) {
+        $_SESSION["aviso"] = ["tipo" => "erro", "texto" => "Não foi possível registrar a compra. Tente novamente."];
+        header("Location: confirmar.php");
+        exit;
     }
+    unset($_SESSION["produto_pendente"]);
+} else {
+    $consulta = "SELECT id_carrinho FROM carrinho WHERE id_usuario = '$idUsuario' LIMIT 1";
+    $resultado = banco($server, $user, $password, $db, $consulta);
+    if (!$resultado || $resultado->num_rows === 0) {
+        $_SESSION["aviso"] = ["tipo" => "erro", "texto" => "Seu carrinho está vazio."];
+        header("Location: carrinho.php");
+        exit;
+    }
+
+    $consulta = "INSERT INTO vendas (numero_venda, id_usuario, id_produto, quantidade, valor_unitario, valor_total, forma_pagamento)
+                 SELECT CONCAT('$numeroBase', LPAD(c.id_carrinho, 10, '0')), '$idUsuario', c.id_produto, c.quantidade,
+                        p.preco, p.preco * c.quantidade, '$pagamentoSQL'
+                 FROM carrinho c INNER JOIN produto p ON p.id_produto = c.id_produto
+                 WHERE c.id_usuario = '$idUsuario'";
+    $resultado = banco($server, $user, $password, $db, $consulta);
+    if (!$resultado) {
+        $_SESSION["aviso"] = ["tipo" => "erro", "texto" => "Não foi possível registrar a compra. Tente novamente."];
+        header("Location: confirmar.php");
+        exit;
+    }
+
+    $consulta = "DELETE FROM carrinho WHERE id_usuario = '$idUsuario'";
+    banco($server, $user, $password, $db, $consulta);
 }
 
-unset($_SESSION["produto_pendente"]);
-unset($_SESSION["carrinho"]);
-
-$_SESSION["numero_venda"] = $numeroVenda;
-$_SESSION["nomes_produtos"] = $nomesProdutos;
-$_SESSION["total_venda"] = $total;
-$_SESSION["forma_pagamento"] = $pagamento;
-
-header("Location: confirmar.php");
+$_SESSION["aviso"] = ["tipo" => "sucesso", "texto" => "Compra concluída com sucesso. Seus jogos estão na biblioteca."];
+header("Location: biblioteca.php");
 exit;
-
 ?>
