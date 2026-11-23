@@ -1,3 +1,5 @@
+Um trabalho escolar que simula um confiavel site de revenda de jogos, possuindo integração com o banco, um sistema de implementação e uso de email em desenvolvimento e em sua esmagadora composição MSQLI e PHP
+```
 -- ============================================================
 -- 1. CRIAÇÃO BANCO
 -- ============================================================
@@ -621,5 +623,7 @@ SELECT
     imagem
 FROM produto
 ORDER BY id_produto;
+
+```
 
 
