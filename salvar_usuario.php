@@ -55,6 +55,15 @@ if ($resultado && $resultado->num_rows > 0) {
     exit;
 }
 
+$consulta_email = "SELECT id_usuario FROM usuario WHERE email = '$email'";
+$resultado_email = banco($server, $user, $password, $db, $consulta_email);
+
+if ($resultado_email && $resultado_email->num_rows > 0) {
+    $_SESSION["erro_cadastro1"] = "Este e-mail já está cadastrado.";
+    header("Location: cadastro1.php");
+    exit;
+}
+
 $consulta_usuario = "INSERT INTO usuario (nome, cpf, email)
                      VALUES ('$nome', '$cpf', '$email')";
 
