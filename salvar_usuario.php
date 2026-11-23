@@ -22,19 +22,37 @@ $cidade = trim($_POST["cidade"] ?? "");
 $estado = trim($_POST["estado"] ?? "");
 $cep = trim($_POST["cep"] ?? "");
 
-if (
-    empty($nome) ||
-    empty($cpf) ||
-    !filter_var($email, FILTER_VALIDATE_EMAIL)
-) {
-    die("Preencha corretamente os dados do cadastro.");
+if (empty($nome)) {
+    $_SESSION["erro_cadastro1"] = "Informe seu nome completo.";
+    header("Location: cadastro1.php");
+    exit;
+}
+
+if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    $_SESSION["erro_cadastro1"] = "Informe um endereço de e-mail válido.";
+    header("Location: cadastro1.php");
+    exit;
+}
+
+if (strlen($cpf) != 11) {
+    $_SESSION["erro_cadastro1"] = "O CPF informado é inválido. Confira os 11 números.";
+    header("Location: cadastro1.php");
+    exit;
+}
+
+if (empty($endereco) || empty($bairro) || empty($cidade) || empty($estado) || empty($cep)) {
+    $_SESSION["erro_cadastro1"] = "Preencha todos os campos de endereço.";
+    header("Location: cadastro1.php");
+    exit;
 }
 
 $consulta = "SELECT id_usuario FROM usuario WHERE cpf = '$cpf'";
 $resultado = banco($server, $user, $password, $db, $consulta);
 
 if ($resultado && $resultado->num_rows > 0) {
-    die("Este CPF já está cadastrado.");
+    $_SESSION["erro_cadastro1"] = "Este CPF já está cadastrado.";
+    header("Location: cadastro1.php");
+    exit;
 }
 
 $consulta_usuario = "INSERT INTO usuario (nome, cpf, email)
@@ -46,7 +64,9 @@ $consulta_id = "SELECT id_usuario FROM usuario WHERE cpf = '$cpf'";
 $resultado = banco($server, $user, $password, $db, $consulta_id);
 
 if (!$resultado || !($usuario = $resultado->fetch_assoc())) {
-    die("Não foi possível salvar os dados do usuário.");
+    $_SESSION["erro_cadastro1"] = "Não foi possível recuperar os dados do usuário cadastrado.";
+    header("Location: cadastro1.php");
+    exit;
 }
 
 $id_usuario = $usuario["id_usuario"];
