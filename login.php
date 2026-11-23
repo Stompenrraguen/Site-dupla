@@ -1,3 +1,4 @@
+
 <?php
 if (!isset($_SESSION)) session_start();
 
@@ -7,15 +8,21 @@ if (isset($_POST["b_comprar"]) && !empty($_POST["produto_id"])) {
 
 $erro = "";
 $cadastro = "";
+$erro_verificacao = "";
 
 if (!empty($_SESSION["erro_login"])) {
     $erro = $_SESSION["erro_login"];
-    unset($_SESSION["erro_login"]); 
+    unset($_SESSION["erro_login"]);
 }
 
 if (!empty($_SESSION["cadastro_ok"])) {
     $cadastro = $_SESSION["cadastro_ok"];
-    unset($_SESSION["cadastro_ok"]); 
+    unset($_SESSION["cadastro_ok"]);
+}
+
+if (!empty($_SESSION["erro_verificacao"])) {
+    $erro_verificacao = $_SESSION["erro_verificacao"];
+    unset($_SESSION["erro_verificacao"]);
 }
 ?>
 <!DOCTYPE html>
@@ -37,6 +44,12 @@ if (!empty($_SESSION["cadastro_ok"])) {
 
     <?php if ($cadastro == "ok"): ?>
         <div class="alerta sucesso">Conta criada com sucesso. Faça login para continuar.</div>
+    <?php endif; ?>
+
+    <?php if (!empty($erro_verificacao)): ?>
+        <div class="alerta erro">
+            <?=htmlspecialchars($erro_verificacao)?>
+        </div>
     <?php endif; ?>
 
     <form action="processa_login.php" method="POST">
