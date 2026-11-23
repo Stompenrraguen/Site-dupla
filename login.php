@@ -9,7 +9,7 @@ if (isset($_POST["b_comprar"]) && !empty($_POST["produto_id"])) {
 $erro = "";
 $cadastro = "";
 $erro_verificacao = "";
-$erro_compra = "";
+$aviso_carrinho = "";
 
 if (!empty($_SESSION["erro_login"])) {
     $erro = $_SESSION["erro_login"];
@@ -26,9 +26,9 @@ if (!empty($_SESSION["erro_verificacao"])) {
     unset($_SESSION["erro_verificacao"]);
 }
 
-if (!empty($_SESSION["erro_compra"])) {
-    $erro_compra = $_SESSION["erro_compra"];
-    unset($_SESSION["erro_compra"]);
+if (!empty($_SESSION["aviso_carrinho"])) {
+    $aviso_carrinho = $_SESSION["aviso_carrinho"];
+    unset($_SESSION["aviso_carrinho"]);
 }
 ?>
 <!DOCTYPE html>
@@ -58,10 +58,8 @@ if (!empty($_SESSION["erro_compra"])) {
         </div>
     <?php endif; ?>
 
-    <?php if (!empty($erro_compra)): ?>
-        <div class="alerta erro">
-            <?= htmlspecialchars($erro_compra) ?>
-        </div>
+    <?php if ($aviso_carrinho == "login"): ?>
+        <div class="alerta erro">Faça login para adicionar produtos ao carrinho.</div>
     <?php endif; ?>
 
     <form action="processa_login.php" method="POST">
