@@ -1,3 +1,4 @@
+
 <?php
 
 if (!isset($_SESSION)) session_start();
@@ -7,6 +8,8 @@ require_once "app/DLL.php";
 
 
 if (empty($_SESSION["logado"])) {
+
+    $_SESSION["erro_compra"] = "Você precisa fazer login para finalizar a compra.";
 
     header("Location: login.php");
     exit;
@@ -28,7 +31,7 @@ extract($_POST);
 $id_usuario = $_SESSION["id_usuario"];
 
 
-$forma_pagamento = trim($forma_pagamento);
+$forma_pagamento = trim($forma_pagamento ?? "");
 
 
 $formas_permitidas = [
@@ -39,6 +42,8 @@ $formas_permitidas = [
 
 
 if (!in_array($forma_pagamento, $formas_permitidas)) {
+
+    $_SESSION["erro_compra"] = "Selecione uma forma de pagamento válida.";
 
     header("Location: confirmar.php");
     exit;
@@ -65,6 +70,8 @@ $resultado = banco(
 
 
 if (!$resultado || $resultado->num_rows == 0) {
+
+    $_SESSION["erro_compra"] = "Seu carrinho está vazio.";
 
     header("Location: carrinho.php");
     exit;
@@ -140,7 +147,9 @@ banco(
 );
 
 
-header("Location: biblioteca.php?compra=ok");
+$_SESSION["compra_ok"] = "Sua compra foi finalizada com sucesso!";
+
+header("Location: biblioteca.php");
 
 exit;
 
