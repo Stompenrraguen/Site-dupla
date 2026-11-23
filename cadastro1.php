@@ -1,6 +1,13 @@
 
 <?php
 if (!isset($_SESSION)) session_start();
+
+$erro = "";
+
+if (!empty($_SESSION["erro_cadastro1"])) {
+    $erro = $_SESSION["erro_cadastro1"];
+    unset($_SESSION["erro_cadastro1"]);
+}
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -16,6 +23,12 @@ if (!isset($_SESSION)) session_start();
 <div class="caixa-formulario grande">
     <h1>Cadastro - Etapa 1</h1>
     <p>Informe seus dados pessoais para criar sua conta.</p>
+
+    <?php if (!empty($erro)): ?>
+        <div class="alerta erro">
+            <?=htmlspecialchars($erro)?>
+        </div>
+    <?php endif; ?>
 
     <form action="salvar_usuario.php" method="POST">
 
