@@ -1,3 +1,4 @@
+
 <?php
 if (!isset($_SESSION)) session_start();
 
@@ -27,6 +28,14 @@ if (!empty($_SESSION["erro_cadastro2"])) {
 
     <?php if ($erro == "login_existe"): ?>
         <div class="alerta erro">Este login já existe. Escolha outro.</div>
+    <?php endif; ?>
+
+    <?php if ($erro == "campos_vazios"): ?>
+        <div class="alerta erro">Preencha o login e a senha para continuar.</div>
+    <?php endif; ?>
+
+    <?php if ($erro == "usuario_nao_encontrado"): ?>
+        <div class="alerta erro">Não foi possível localizar seus dados. Inicie o cadastro novamente.</div>
     <?php endif; ?>
 
     <form action="salvar_login.php" method="POST">
