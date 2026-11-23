@@ -1,3 +1,4 @@
+
 <?php
 
 if (!isset($_SESSION)) {
@@ -25,9 +26,30 @@ if (!empty($_SESSION["produto_pendente"])) {
 }
 
 if (empty($itensCompra)) {
+    $_SESSION["erro_venda"] = "Não existem produtos para finalizar a compra.";
     header("Location: index.php");
     exit;
 }
+
+$formasPagamento = [
+    "Pix",
+    "Cartão de Crédito",
+    "Boleto",
+    "Saldo PoubreSteam"
+];
+
+if (!in_array($pagamento, $formasPagamento, true)) {
+    $_SESSION["erro_venda"] = "Selecione uma forma de pagamento válida.";
+    header("Location: confirmar.php");
+    exit;
+}
+
+if (empty($_SESSION["cpf"])) {
+    $_SESSION["erro_venda"] = "Não foi possível identificar sua conta. Faça login novamente.";
+    header("Location: login.php");
+    exit;
+}
+
 $cpf = $_SESSION["cpf"];
 
 $consultaUsuario = "SELECT id_usuario
@@ -45,7 +67,9 @@ $resultadoUsuario = banco(
 $usuario = $resultadoUsuario->fetch_assoc();
 
 if (!$usuario) {
-    die("Usuário não encontrado.");
+    $_SESSION["erro_venda"] = "Usuário não encontrado. Verifique seus dados.";
+    header("Location: confirmar.php");
+    exit;
 }
 
 $idUsuario = $usuario["id_usuario"];
@@ -65,9 +89,12 @@ foreach ($quantidades as $idProduto => $quantidade) {
         $nomeProduto = $produtos[$idProduto]["nome"];
         $preco = (float)$produtos[$idProduto]["preco"];
         $valorTotalProduto = $preco * $quantidade;
+
         $nomesProdutos[] = $nomeProduto;
         $total += $valorTotalProduto;
+
         $numeroVendaProduto = $numeroVenda . $contador;
+
         $consulta = "INSERT INTO vendas
         (
             numero_venda,
@@ -103,9 +130,16 @@ foreach ($quantidades as $idProduto => $quantidade) {
     }
 }
 
+if ($contador == 0) {
+    $_SESSION["erro_venda"] = "Não foi possível encontrar os produtos selecionados.";
+    header("Location: index.php");
+    exit;
+}
+
 unset($_SESSION["produto_pendente"]);
 unset($_SESSION["carrinho"]);
 
+$_SESSION["venda_concluida"] = true;
 $_SESSION["numero_venda"] = $numeroVenda;
 $_SESSION["nomes_produtos"] = $nomesProdutos;
 $_SESSION["total_venda"] = $total;
