@@ -9,6 +9,7 @@ if (isset($_POST["b_comprar"]) && !empty($_POST["produto_id"])) {
 $erro = "";
 $cadastro = "";
 $erro_verificacao = "";
+$erro_compra = "";
 
 if (!empty($_SESSION["erro_login"])) {
     $erro = $_SESSION["erro_login"];
@@ -23,6 +24,11 @@ if (!empty($_SESSION["cadastro_ok"])) {
 if (!empty($_SESSION["erro_verificacao"])) {
     $erro_verificacao = $_SESSION["erro_verificacao"];
     unset($_SESSION["erro_verificacao"]);
+}
+
+if (!empty($_SESSION["erro_compra"])) {
+    $erro_compra = $_SESSION["erro_compra"];
+    unset($_SESSION["erro_compra"]);
 }
 ?>
 <!DOCTYPE html>
@@ -49,6 +55,12 @@ if (!empty($_SESSION["erro_verificacao"])) {
     <?php if (!empty($erro_verificacao)): ?>
         <div class="alerta erro">
             <?=htmlspecialchars($erro_verificacao)?>
+        </div>
+    <?php endif; ?>
+
+    <?php if (!empty($erro_compra)): ?>
+        <div class="alerta erro">
+            <?= htmlspecialchars($erro_compra) ?>
         </div>
     <?php endif; ?>
 
