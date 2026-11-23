@@ -1,3 +1,4 @@
+
 <?php
 if(!isset($_SESSION)) session_start();
 
@@ -29,6 +30,20 @@ exit;
 </header>
 
 <main class="conteudo-principal">
+
+<?php
+if(isset($_SESSION["aviso_mensagem"])){
+
+    $cor = $_SESSION["aviso_tipo"] == "sucesso" ? "green" : "red";
+
+    echo "<p style='color:".$cor."; font-weight:bold;'>";
+    echo htmlspecialchars($_SESSION["aviso_mensagem"]);
+    echo "</p>";
+
+    unset($_SESSION["aviso_tipo"]);
+    unset($_SESSION["aviso_mensagem"]);
+}
+?>
 
 <h2 class="titulo-secao">Adicionar novo produto</h2>
 
