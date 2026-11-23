@@ -1,3 +1,4 @@
+
 <?php
 if(!isset($_SESSION)) session_start();
 
@@ -7,6 +8,13 @@ require_once "app/DLL.php";
 if(empty($_SESSION["logado"])){
     header("Location: login.php");
     exit;
+}
+
+$compraOk = "";
+
+if(!empty($_SESSION["compra_ok"])){
+    $compraOk = $_SESSION["compra_ok"];
+    unset($_SESSION["compra_ok"]);
 }
 
 $compras=[];
@@ -64,6 +72,12 @@ while($venda=$resultado->fetch_assoc()){
 <main class="conteudo-principal">
 
 <h2 class="titulo-secao">Sua biblioteca</h2>
+
+<?php if(!empty($compraOk)): ?>
+<div class="alerta sucesso">
+<?=htmlspecialchars($compraOk)?>
+</div>
+<?php endif; ?>
 
 <?php if(empty($compras)): ?>
 
