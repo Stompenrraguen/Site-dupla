@@ -1,3 +1,4 @@
+
 <?php
 if (!isset($_SESSION)) session_start();
 include "produtos.php";
@@ -6,6 +7,9 @@ if (empty($_SESSION["carrinho"])) {
     $_SESSION["carrinho"] = [];
 }
 
+$aviso = "";
+$tipoAviso = "";
+
 if (isset($_POST["b_adicionar"])) {
     $idProduto = (int)($_POST["produto_id"] ?? 0);
 
@@ -13,19 +17,26 @@ if (isset($_POST["b_adicionar"])) {
         if (isset($produtos[$idProduto])) {
             $_SESSION["adicionar_pendente"] = $idProduto;
         }
+
+        $_SESSION["aviso_carrinho"] = "login";
         header("Location: login.php");
         exit;
     }
 
     if (isset($produtos[$idProduto])) {
         $_SESSION["carrinho"][] = $idProduto;
+        $_SESSION["aviso_carrinho"] = "adicionado";
     }
+
+    header("Location: carrinho.php");
+    exit;
 }
 
 if (isset($_POST["b_remover"])) {
     $idProduto = (int)($_POST["produto_id"] ?? 0);
     $novoCarrinho = [];
     $removido = false;
+
     foreach ($_SESSION["carrinho"] as $id) {
         if ($id == $idProduto && $removido == false) {
             $removido = true;
@@ -33,11 +44,28 @@ if (isset($_POST["b_remover"])) {
             $novoCarrinho[] = $id;
         }
     }
+
     $_SESSION["carrinho"] = $novoCarrinho;
+
+    if ($removido) {
+        $_SESSION["aviso_carrinho"] = "removido";
+    }
+
+    header("Location: carrinho.php");
+    exit;
 }
 
 if (isset($_POST["b_limpar"])) {
     $_SESSION["carrinho"] = [];
+    $_SESSION["aviso_carrinho"] = "limpo";
+
+    header("Location: carrinho.php");
+    exit;
+}
+
+if (!empty($_SESSION["aviso_carrinho"])) {
+    $aviso = $_SESSION["aviso_carrinho"];
+    unset($_SESSION["aviso_carrinho"]);
 }
 ?>
 <!DOCTYPE html>
@@ -71,6 +99,18 @@ if (isset($_POST["b_limpar"])) {
 
 <main class="conteudo-principal pagina-carrinho">
     <h2 class="titulo-secao">Seu carrinho</h2>
+
+    <?php if ($aviso == "adicionado"): ?>
+        <div class="alerta sucesso">Produto adicionado ao carrinho com sucesso!</div>
+    <?php endif; ?>
+
+    <?php if ($aviso == "removido"): ?>
+        <div class="alerta sucesso">Produto removido do carrinho.</div>
+    <?php endif; ?>
+
+    <?php if ($aviso == "limpo"): ?>
+        <div class="alerta sucesso">Carrinho esvaziado com sucesso.</div>
+    <?php endif; ?>
 
     <?php if (empty($_SESSION["carrinho"])): ?>
         <div class="painel-vazio">
