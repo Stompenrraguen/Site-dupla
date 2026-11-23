@@ -18,6 +18,7 @@ $login = preg_replace("/[^a-zA-Z0-9_]/", "", trim($_POST["login"] ?? ""));
 $senha = trim($_POST["senha"] ?? "");
 
 if (empty($login) || empty($senha)) {
+    $_SESSION["erro_cadastro2"] = "campos_vazios";
     header("Location: cadastro2.php");
     exit;
 }
@@ -39,7 +40,9 @@ $resultado_usuario = banco($server, $user, $password, $db, $consulta_usuario);
 $usuario = $resultado_usuario ? $resultado_usuario->fetch_assoc() : null;
 
 if (!$usuario) {
-    die("Usuário não encontrado.");
+    $_SESSION["erro_cadastro2"] = "usuario_nao_encontrado";
+    header("Location: cadastro2.php");
+    exit;
 }
 
 $id_usuario = $usuario["id_usuario"];
@@ -63,7 +66,13 @@ $consulta_token = "UPDATE usuario
 banco($server, $user, $password, $db, $consulta_token);
 
 if (!enviarVerificacao($email, $nome, $token)) {
-    die("Cadastro realizado, mas não foi possível enviar o e-mail. Verifique o arquivo de configuração SMTP e os registros de erro do PHP.");
+    unset($_SESSION["cpf_cadastro"]);
+    unset($_SESSION["email_cadastro"]);
+
+    $_SESSION["erro_verificacao"] = "Cadastro realizado, mas não foi possível enviar o e-mail de verificação. Entre em contato com o suporte.";
+
+    header("Location: login.php");
+    exit;
 }
 
 unset($_SESSION["cpf_cadastro"]);
