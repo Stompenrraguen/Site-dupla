@@ -1,0 +1,47 @@
+JOGOS, SEUS PREÇOS E QUANTIA DE VEZES COMPRADA:
+´´´ 
+SELECT
+    produto.nome AS Jogo,
+    produto.preco AS Preco,
+    COALESCE(SUM(vendas.quantidade), 0) AS Vezes_Comprado
+FROM produto
+
+LEFT JOIN vendas
+    ON produto.id_produto = vendas.id_produto
+
+GROUP BY
+    produto.id_produto,
+    produto.nome,
+    produto.preco
+
+ORDER BY Vezes_Comprado DESC;
+´´´
+
+USUARIOS, QUANTIDADE DE VEZES QUE COMPRARAM ALGO E SEU GASTO TOTAL:
+
+´´´
+SELECT
+    usuario.nome AS Usuario,
+    COUNT(vendas.id_venda) AS Total_Compras,
+    SUM(vendas.valor_total) AS Total_Gasto
+FROM usuario
+
+LEFT JOIN vendas
+    ON usuario.id_usuario = vendas.id_usuario
+
+GROUP BY
+    usuario.id_usuario,
+    usuario.nome;
+´´´
+
+JOGOS MAIS CAROS EM ORDEM:
+'''
+SELECT
+    nome AS Jogo,
+    preco AS Preco,
+    genero AS Genero
+FROM produto
+ORDER BY preco DESC
+LIMIT 5;
+''' 
+
